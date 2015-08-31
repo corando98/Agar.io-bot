@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.62
+// @version     3.63
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.62;
+var aposBotVersion = 3.63;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -74,8 +74,8 @@ function getLatestCommit() {
                 latestVersion = latestVersion.substring(latestVersion.indexOf("// @version")+11,latestVersion.indexOf("// @grant"));
 
                 latestVersion = parseFloat(latestVersion + 0.0000);
-                var myVersion = parseFloat(aposBotVersion + 0.0000); 
-                
+                var myVersion = parseFloat(aposBotVersion + 0.0000);
+
                 if(latestVersion > myVersion)
                 {
                     update("aposBot", "bot.user.js", "https://github.com/Apostolique/Agar.io-bot/blob/" + sha + "/bot.user.js/");
@@ -177,7 +177,7 @@ function AposBot() {
     },
 
     this.canSplit = function(player1, player2) {
-        return this.compareSize(player1, player2, 2.66) && !this.compareSize(player1, player2, 7);
+        return this.compareSize(player1, player2, 2.8) && !this.compareSize(player1, player2, 20);
     };
 
     this.isItMe = function(player, cell) {
@@ -186,7 +186,7 @@ function AposBot() {
             var currentRed = currentColor.substring(1,3);
             var currentGreen = currentColor.substring(3,5);
             var currentBlue = currentColor.substring(5,7);
-            
+
             var currentTeam = this.getTeam(currentRed, currentGreen, currentBlue);
 
             var cellColor = cell.color;
@@ -223,25 +223,22 @@ function AposBot() {
     };
 
     this.isFood = function(blob, cell) {
-        if (!cell.isVirus() && this.compareSize(cell, blob, 1.33) || (cell.size <= 11)) {
+        if (!cell.isVirus() && this.compareSize(cell, blob, 1.33) || (cell.size <= 13)) {
             return true;
         }
         return false;
     };
 
     this.isThreat = function(blob, cell) {
-        if (!cell.isVirus() && this.isFood(cell, blob)) {
+
+        if (!cell.isVirus() && this.compareSize(blob, cell, 1.30)) {
             return true;
         }
         return false;
-        /*if (!cell.isVirus() && this.compareSize(blob, cell, 1.33)) {
-            return true;
-        }
-        return false;*/
     };
 
     this.isVirus = function(blob, cell) {
-        if (cell.isVirus() && this.compareSize(cell, blob, 1.30)) {
+        if (cell.isVirus() && this.compareSize(cell, blob, 1.2)) {
             return true;
         } else if (cell.isVirus() && cell.color.substring(3,5).toLowerCase() != "ff") {
             return true;
@@ -276,7 +273,7 @@ function AposBot() {
                     //IT'S FOOD!
                     foodElementList.push(listToUse[element]);
 
-                    
+
                 } else if (that.isThreat(blob, listToUse[element])) {
                     //IT'S DANGER!
                     threatList.push(listToUse[element]);
@@ -860,7 +857,7 @@ function AposBot() {
                         //console.log("Found distance.");
 
                         var enemyCanSplit = this.canSplit(player[k], allPossibleThreats[i]);
-                        
+
                         for (var j = clusterAllFood.length - 1; j >= 0 ; j--) {
                             var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
                             if (this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, clusterAllFood[j][0], clusterAllFood[j][1]) < secureDistance)
