@@ -26,6 +26,7 @@ SOFTWARE.*/
 // ==/UserScript==
 
 var aposLauncherVersion = 4.123;
+var splitTimer = new Date();
 
 Number.prototype.mod = function(n) {
     return ((this % n) + n) % n;
@@ -65,35 +66,60 @@ function getLatestCommit() {
                 latestVersion = parseFloat(latestVersion + 0.0000);
                 var myVersion = parseFloat(aposLauncherVersion + 0.0000);
 
-                if (latestVersion > myVersion) {
-                    update("aposLauncher", "launcher.user.js", "https://github.com/Apostolique/Agar.io-bot/blob/" + sha + "/launcher.user.js/");
-                }
+                //if (latestVersion > myVersion) {
+                    //update("aposLauncher", "launcher.user.js", "https://github.com/Apostolique/Agar.io-bot/blob/" + sha + "/launcher.user.js/");
+                //}
                 console.log('Current launcher.user.js Version: ' + myVersion + " on Github: " + latestVersion);
             });
 
         }).fail(function() {});
 }
-getLatestCommit();
+//getLatestCommit();
 
 console.log("Running Bot Launcher!");
 (function(d, e) {
 
     //UPDATE
     function keyAction(e) {
+      //t
         if (84 == e.keyCode) {
             console.log("Toggle");
             toggle = !toggle;
         }
+
+
+
+        //r
         if (82 == e.keyCode) {
             console.log("ToggleDraw");
             toggleDraw = !toggleDraw;
         }
+
+
+        //s
+        if (83 == e.keyCode) {
+            console.log("reset score");
+            R = Bb();
+        }
+
+
+        // space
+        if (32 == e.keyCode) {
+            console.log("space:  split");
+            splitTimer = new Date();
+        }
+
+
+        //d
         if (68 == e.keyCode) {
             window.setDarkTheme(!getDarkBool());
         }
+
+        //f
         if (70 == e.keyCode) {
             window.setShowMass(!getMassBool());
         }
+        //e
         if (69 == e.keyCode) {
             if (message.length > 0) {
                 window.setMessage([]);
@@ -104,7 +130,7 @@ console.log("Running Bot Launcher!");
                 window.refreshTwitch();
             }
         }
-        window.botList[botIndex].keyAction(e);
+
     }
 
     function humanPlayer() {
@@ -653,9 +679,9 @@ console.log("Running Bot Launcher!");
             reviving = true;
         } else if (getPlayer().length > 0 && reviving) {
             reviving = false;
-            console.log("Done Reviving!");
+            console.log("Done Reviving: " + lifeTimer.toString() );
         }
-        
+
         if (T()) {
             var a = fa - m / 2;
             var b = ga - r / 2;
@@ -776,7 +802,7 @@ console.log("Running Bot Launcher!");
         f.lineTo(getMapEndX(), getMapEndY());
         f.stroke();
         f.restore();
-        
+
         for (d = 0; d < v.length; d++) v[d].w(f);
         for (d = 0; d < Q.length; d++) Q[d].w(f);
         //UPDATE
@@ -803,21 +829,36 @@ console.log("Running Bot Launcher!");
         }
         f.restore();
         z && z.width && f.drawImage(z, m - z.width - 10, 10);
+
         R = Math.max(R, Bb());
+        // R = Bb();  // instant score
 
         //UPDATE
 
         var currentDate = new Date();
 
         var nbSeconds = 0;
+        var splitSeconds = 0;
         if (getPlayer().length > 0) {
             //nbSeconds = currentDate.getSeconds() + currentDate.getMinutes() * 60 + currentDate.getHours() * 3600 - lifeTimer.getSeconds() - lifeTimer.getMinutes() * 60 - lifeTimer.getHours() * 3600;
-            nbSeconds = (currentDate.getTime() - lifeTimer.getTime())/1000;
+            nbSeconds = ~~( (currentDate.getTime() - lifeTimer.getTime() )/1000 );
+            splitSeconds = (currentDate.getTime() - splitTimer.getTime())/1000;
         }
+
+        var ttr = (Bb()*0.02/100) + 30;
+        //var ttr = 30;
+        var delayTilMerge = ~~(ttr - splitSeconds);
+
+        if (delayTilMerge < 0)
+        {
+          delayTilMerge = 0;
+        }
+
 
         bestTime = Math.max(nbSeconds, bestTime);
 
-        var displayText = 'Score: ' + ~~(R / 100) + " Current Time: " + nbSeconds + " seconds.";
+//        var displayText = 'Score: ' + ~~(R / 100) + " Current Time: " + nbSeconds + " seconds.";
+        var displayText = 'Score: ' + ~~(R / 100) + " Current Time: " + nbSeconds + " sec; re-merge: " +delayTilMerge + " sec.";
 
         0 != R && (null == ua && (ua = new va(24, "#FFFFFF")), ua.C(displayText), c = ua.L(), a = c.width, f.globalAlpha = .2, f.fillStyle = "#000000", f.fillRect(10, r - 10 - 24 - 10, a + 10, 34), f.globalAlpha = 1, f.drawImage(c, 15, r -
             10 - 24 - 5));
@@ -1307,7 +1348,7 @@ console.log("Running Bot Launcher!");
                 dArc = [],
                 dText = [],
                 lines = [],
-                names = ["NotReallyABot"],
+                names = ["Nerds Я Us"],
                 originalName = names[Math.floor(Math.random() * names.length)],
                 sessionScore = 0,
                 serverIP = "",
@@ -1937,7 +1978,7 @@ console.log("Running Bot Launcher!");
                     id: 0,
                     a: null,
                     name: null,
-                    o: null,    
+                    o: null,
                     O: null,
                     x: 0,
                     y: 0,
@@ -1969,7 +2010,7 @@ console.log("Running Bot Launcher!");
                     },
                     getUptimeTime: function() {
                         return this.Q;
-                    }, 
+                    },
                     X: function() {
                         var a;
                         for (a = 0; a < v.length; a++)
