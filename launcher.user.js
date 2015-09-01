@@ -95,6 +95,13 @@ console.log("Running Bot Launcher!");
             toggleDraw = !toggleDraw;
         }
 
+        //a
+        // if (65 == e.keyCode) {
+        //     console.log("ToggleAB");
+        //     toggleAB = !toggleAB;
+        // }
+
+
 
         //s
         if (83 == e.keyCode) {
@@ -1026,6 +1033,7 @@ console.log("Running Bot Launcher!");
         debugStrings.push("Launcher: AposLauncher " + aposLauncherVersion);
         debugStrings.push("T - Bot: " + (!toggle ? "On" : "Off"));
         debugStrings.push("R - Lines: " + (!toggleDraw ? "On" : "Off"));
+        //debugStrings.push("A - A/B: " + (!toggleAB ? "On" : "Off"));
 
         for (var i = 0; i < botString.length; i++) {
             debugStrings.push(botString[i]);
@@ -1342,6 +1350,7 @@ console.log("Running Bot Launcher!");
                 //UPDATE
                 toggle = false,
                 toggleDraw = false,
+                toggleAB = true,
                 tempPoint = [0, 0, 1],
                 dPoints = [],
                 circles = [],
