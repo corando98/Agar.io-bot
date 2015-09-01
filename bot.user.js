@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63004
+// @version     3.63006
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.63005;
+var aposBotVersion = 3.63006;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -329,6 +329,9 @@ function AposBot() {
       return cell.name + "|" + cell.color;
     };
 
+
+
+
     this.findSplitCellNames = function(that, player, listToUse, splitCellPlayers ){
 
 
@@ -337,6 +340,7 @@ function AposBot() {
           var cellName = that.getNameSplitCell( blob );
           var cellSize = blob.size;
           var MINIMIZE_CELL_SIZE = 21;
+          var CELL_NAME_VIRUS = '|#33ff33';
 
           // if it's a tiny cell, don't count it.
           if ( cellSize < MINIMIZE_CELL_SIZE )
@@ -350,7 +354,14 @@ function AposBot() {
                 //( !that.isItMe( player, listToUse[element] ) ) )  {
             //console.log( "name: (" + cellName + ");");
           //}
-          if ( "" !== cellName && !isMe )  {
+
+
+          // if ( CELL_NAME_VIRUS == cellName )
+          // {
+          //   console.log("eek!  it's a virus");
+          // }
+
+          if ( CELL_NAME_VIRUS !== cellName && !isMe )  {
 
             var size = splitCellPlayers[ cellName ];
             if (size > 0){
