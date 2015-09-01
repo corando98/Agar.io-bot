@@ -29,7 +29,7 @@ SOFTWARE.*/
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.63004;
+var aposBotVersion = 3.63005;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -115,7 +115,7 @@ function AposBot() {
     this.name = "AposBot " + aposBotVersion;
 
     this.toggleFollow = false;
-    this.toggleAB = false;
+    this.toggleAB = true;
 
     this.keyAction = function(key) {
       console.log( "bot keyAction");
@@ -253,13 +253,13 @@ function AposBot() {
     };
 
 
-    this.compareDuplicateSize = function(player1, cellSize, ratio) {
-            console.log( "comparing dupe size");
-            if (player1.size * player1.size * ratio < cellSize * cellSize) {
-                return true;
-            }
-            return false;
-        };
+    // this.compareSplitCellSize = function(player1, cellSize, ratio) {
+    //         console.log( "comparing dupe size");
+    //         if (player1.size * player1.size * ratio < cellSize * cellSize) {
+    //             return true;
+    //         }
+    //         return false;
+    //     };
 
 
 
@@ -277,35 +277,11 @@ function AposBot() {
     };
 
 
-        this.isThreat = function(blob, cell, duplicatePlayers) {
+        this.isThreat = function(blob, cell, splitCellPlayers) {
             // console.log( "isThreat");
 
             if (!cell.isVirus() )
             {
-              //console.log( "isThreat.  not virus.");
-
-    //           console.log ("got here");
-    //            if (threatSize > 0)
-    //           // {
-    //           //   console.log( "isThreat.  not virus.  threatSize > 0");
-    // //            if (this.compareDuplicateSize (blob, threatSize, 1.30 ) )
-    //           //   if (this.compareDuplicateSize (blob, cell, 1.30 ) )
-    //           //   {
-    //           //     console.log ("dupe and threat");
-    //           //     return true;
-    //           //   }
-    //           //   else {
-    //           //     console.log( "dupe but not threat");
-    //           //   }
-    //           // }
-    //
-    //           var threatSize = 0;// duplicatePlayers[ cell.name ];
-    //           if ( threatSize > 0 )
-    //           {
-    //             console.log ("duplicate threat; cell.name(" + cell.name +"); threatSize(" + threatSize +"); cell.size(" + cell.size +");" );
-    // //            blob.size = threatSize;
-    //           }
-
               if ( this.compareSize(blob, cell, 1.30) )
               {
                 //console.log( "not dupe, but threat");
@@ -313,7 +289,7 @@ function AposBot() {
               }
               else
               {
-                var threatSize = duplicatePlayers[ cell.name ];
+                var threatSize = splitCellPlayers[ cell.name ];
                 if ( this.compareSplitThreatSize(cell, threatSize, 1.30 ) )
                 {
                   return true;
@@ -347,13 +323,27 @@ function AposBot() {
         return ((mass*0.02) + 30);
     };
 
-    this.findDuplicateNames = function(that, player, listToUse, duplicatePlayers ){
+    // name is combination of given name + color to differentiate players
+    // that pick same names but should be considered differentiate
+    this.getNameSplitCell = function( cell ) {
+      return cell.name + "|" + cell.color;
+    };
+
+    this.findSplitCellNames = function(that, player, listToUse, splitCellPlayers ){
 
 
           Object.keys(listToUse).forEach( function(element, index){
           var blob = listToUse[element];
-          var cellName = blob.name;
+          var cellName = that.getNameSplitCell( blob );
           var cellSize = blob.size;
+          var MINIMIZE_CELL_SIZE = 21;
+
+          // if it's a tiny cell, don't count it.
+          if ( cellSize < MINIMIZE_CELL_SIZE )
+          {
+            cellSize = 0;
+          }
+
           var isMe = that.isItMe( player, blob );
 
           //if ( ( null !== cellName || "" <> cellName ) &&
@@ -362,14 +352,14 @@ function AposBot() {
           //}
           if ( "" !== cellName && !isMe )  {
 
-            var size = duplicatePlayers[ cellName ];
+            var size = splitCellPlayers[ cellName ];
             if (size > 0){
               size += ~~cellSize;
-              console.log( "Duplicate name: " + cellName +"; size: " + size );
+              console.log( "Split cell name: " + cellName +"; size: " + size );
             } else {
               size = ~~cellSize;
             }
-          duplicatePlayers[ cellName ] = size;
+          splitCellPlayers[ cellName ] = size;
 
 
           }
@@ -390,9 +380,9 @@ function AposBot() {
         var splitTargetList = [];
 
         var player = getPlayer();
-        var duplicatePlayers = [];
+        var splitCellPlayers = [];
 
-        that.findDuplicateNames( that, player, listToUse, duplicatePlayers );
+        that.findSplitCellNames( that, player, listToUse, splitCellPlayers );
 
         Object.keys(listToUse).forEach(function(element, index) {
             var isMe = that.isItMe(player, listToUse[element]);
@@ -407,10 +397,10 @@ function AposBot() {
                     foodElementList.push(listToUse[element]);
 
 
-                } else if (that.isThreat(blob, listToUse[element], duplicatePlayers ) ) {
+                } else if (that.isThreat(blob, listToUse[element], splitCellPlayers ) ) {
                     //IT'S DANGER!
                     var dangerCell = listToUse[element];
-                    // dangerCell.size = duplicatePlayers[ dangerCell.name ];
+
                     threatList.push( dangerCell );
                 } else if (that.isVirus(blob, listToUse[element])) {
                     //IT'S VIRUS!
@@ -432,7 +422,7 @@ function AposBot() {
             foodList.push([foodElementList[i].x, foodElementList[i].y, foodElementList[i].size]);
         }
 
-        return [foodList, threatList, virusList, splitTargetList, duplicatePlayers];
+        return [foodList, threatList, virusList, splitTargetList, splitCellPlayers];
     };
 
     this.getAll = function(blob) {
@@ -955,7 +945,7 @@ function AposBot() {
                     //The viruses are stored in element 2 of allIsAll
                     var allPossibleViruses = allIsAll[2];
 
-                    var allDuplicatePlayers = allIsAll[3];
+                    var allSplitCellPlayers = allIsAll[3];
 
                     //The bot works by removing angles in which it is too
                     //dangerous to travel towards to.
@@ -987,7 +977,7 @@ function AposBot() {
 
                         var normalDangerDistance = allPossibleThreats[i].size;
 
-                        var sumOfSplitSize = allDuplicatePlayers[ thisThreat.name ];
+                        var sumOfSplitSize = allSplitCellPlayers[ this.getNameSplitCell( thisThreat ) ];
                         if ( this.toggleAB )
                         {
                           if ( sumOfSplitSize > normalDangerDistance )
