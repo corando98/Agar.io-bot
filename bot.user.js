@@ -29,7 +29,7 @@ SOFTWARE.*/
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.63;
+var aposBotVersion = 3.63003;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -45,6 +45,8 @@ Number.prototype.mod = function(n) {
 Array.prototype.peek = function() {
     return this[this.length - 1];
 };
+
+
 
 var sha = "efde0488cc2cc176db48dd23b28a20b90314352b";
 function getLatestCommit() {
@@ -121,7 +123,8 @@ function AposBot() {
     };
 
     this.displayText = function() {
-        return ["Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off")];
+//        return ["Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off")];
+          return [""];
     };
 
     this.splitDistance = 710;
@@ -174,7 +177,16 @@ function AposBot() {
             return true;
         }
         return false;
-    },
+    };
+
+    this.compareSplitThreatSize = function(player1, player2Size, ratio) {
+        if (player1.size * player1.size * ratio < player2Size * player2Size) {
+            return true;
+        }
+        return false;
+    };
+
+
 
     this.canSplit = function(player1, player2) {
         return this.compareSize(player1, player2, 2.8) && !this.compareSize(player1, player2, 20);
@@ -229,13 +241,80 @@ function AposBot() {
         return false;
     };
 
-    this.isThreat = function(blob, cell) {
 
-        if (!cell.isVirus() && this.compareSize(blob, cell, 1.30)) {
+    this.compareDuplicateSize = function(player1, cellSize, ratio) {
+            console.log( "comparing dupe size");
+            if (player1.size * player1.size * ratio < cellSize * cellSize) {
+                return true;
+            }
+            return false;
+        };
+
+
+
+    this.isThreat = function(blob, cell) {
+        if (!cell.isVirus() )
+        {
+          if ( this.compareSize(blob, cell, 1.30) )
+            {
+            //console.log( "not dupe, but threat");
             return true;
-        }
+          }
         return false;
+
+      }
     };
+
+
+        this.isThreat = function(blob, cell, duplicatePlayers) {
+            // console.log( "isThreat");
+
+            if (!cell.isVirus() )
+            {
+              //console.log( "isThreat.  not virus.");
+
+    //           console.log ("got here");
+    //            if (threatSize > 0)
+    //           // {
+    //           //   console.log( "isThreat.  not virus.  threatSize > 0");
+    // //            if (this.compareDuplicateSize (blob, threatSize, 1.30 ) )
+    //           //   if (this.compareDuplicateSize (blob, cell, 1.30 ) )
+    //           //   {
+    //           //     console.log ("dupe and threat");
+    //           //     return true;
+    //           //   }
+    //           //   else {
+    //           //     console.log( "dupe but not threat");
+    //           //   }
+    //           // }
+    //
+    //           var threatSize = 0;// duplicatePlayers[ cell.name ];
+    //           if ( threatSize > 0 )
+    //           {
+    //             console.log ("duplicate threat; cell.name(" + cell.name +"); threatSize(" + threatSize +"); cell.size(" + cell.size +");" );
+    // //            blob.size = threatSize;
+    //           }
+
+              if ( this.compareSize(blob, cell, 1.30) )
+              {
+                //console.log( "not dupe, but threat");
+                return true;
+              }
+              else
+              {
+                var threatSize = duplicatePlayers[ cell.name ];
+                if ( this.compareSplitThreatSize(cell, threatSize, 1.30 ) )
+                {
+                  return true;
+                }
+              }
+            return false;
+
+          }
+        };
+
+
+
 
     this.isVirus = function(blob, cell) {
         if (cell.isVirus() && this.compareSize(cell, blob, 1.2)) {
@@ -257,6 +336,42 @@ function AposBot() {
         return ((mass*0.02) + 30);
     };
 
+    this.findDuplicateNames = function(that, player, listToUse, duplicatePlayers ){
+
+
+          Object.keys(listToUse).forEach( function(element, index){
+          var blob = listToUse[element];
+          var cellName = blob.name;
+          var cellSize = blob.size;
+          var isMe = that.isItMe( player, blob );
+
+          //if ( ( null !== cellName || "" <> cellName ) &&
+                //( !that.isItMe( player, listToUse[element] ) ) )  {
+            //console.log( "name: (" + cellName + ");");
+          //}
+          if ( "" !== cellName && !isMe )  {
+
+            var size = duplicatePlayers[ cellName ];
+            if (size > 0){
+              size += ~~cellSize;
+              console.log( "Duplicate name: " + cellName +"; size: " + size );
+            } else {
+              size = ~~cellSize;
+            }
+          duplicatePlayers[ cellName ] = size;
+
+
+          }
+
+
+        });
+
+
+
+      };
+
+
+
     this.separateListBasedOnFunction = function(that, listToUse, blob) {
         var foodElementList = [];
         var threatList = [];
@@ -264,9 +379,16 @@ function AposBot() {
         var splitTargetList = [];
 
         var player = getPlayer();
+        var duplicatePlayers = [];
+
+        that.findDuplicateNames( that, player, listToUse, duplicatePlayers );
 
         Object.keys(listToUse).forEach(function(element, index) {
             var isMe = that.isItMe(player, listToUse[element]);
+
+
+
+
 
             if (!isMe) {
                 if (that.isFood(blob, listToUse[element]) && listToUse[element].isNotMoving()) {
@@ -274,9 +396,11 @@ function AposBot() {
                     foodElementList.push(listToUse[element]);
 
 
-                } else if (that.isThreat(blob, listToUse[element])) {
+                } else if (that.isThreat(blob, listToUse[element], duplicatePlayers ) ) {
                     //IT'S DANGER!
-                    threatList.push(listToUse[element]);
+                    var dangerCell = listToUse[element];
+                    // dangerCell.size = duplicatePlayers[ dangerCell.name ];
+                    threatList.push( dangerCell );
                 } else if (that.isVirus(blob, listToUse[element])) {
                     //IT'S VIRUS!
                     virusList.push(listToUse[element]);
@@ -297,7 +421,7 @@ function AposBot() {
             foodList.push([foodElementList[i].x, foodElementList[i].y, foodElementList[i].size]);
         }
 
-        return [foodList, threatList, virusList, splitTargetList];
+        return [foodList, threatList, virusList, splitTargetList, duplicatePlayers];
     };
 
     this.getAll = function(blob) {
@@ -820,6 +944,8 @@ function AposBot() {
                     //The viruses are stored in element 2 of allIsAll
                     var allPossibleViruses = allIsAll[2];
 
+                    var allDuplicatePlayers = allIsAll[3];
+
                     //The bot works by removing angles in which it is too
                     //dangerous to travel towards to.
                     var badAngles = [];
@@ -845,18 +971,31 @@ function AposBot() {
                     })*/
 
                     for (var i = 0; i < allPossibleThreats.length; i++) {
+                        var thisThreat = allPossibleThreats[i];
+                        var enemyDistance = this.computeDistance( thisThreat.x, thisThreat.y, player[k].x, player[k].y);
 
-                        var enemyDistance = this.computeDistance(allPossibleThreats[i].x, allPossibleThreats[i].y, player[k].x, player[k].y);
+                        var normalDangerDistance = allPossibleThreats[i].size;
 
-                        var splitDangerDistance = allPossibleThreats[i].size + this.splitDistance + 150;
+                        var sumOfSplitSize = allDuplicatePlayers[ thisThreat.name ];
+                        if ( sumOfSplitSize > normalDangerDistance )
+                        {
+                          normalDangerDistance = sumOfSplitSize;
+                        }
 
-                        var normalDangerDistance = allPossibleThreats[i].size + 150;
+                        normalDangerDistance += 150;
+
+
+                        var splitDangerDistance = normalDangerDistance + this.splitDistance;
+
+
+
+
 
                         var shiftDistance = player[k].size;
 
                         //console.log("Found distance.");
 
-                        var enemyCanSplit = this.canSplit(player[k], allPossibleThreats[i]);
+                        var enemyCanSplit = this.canSplit(player[k], thisThreat );
 
                         for (var j = clusterAllFood.length - 1; j >= 0 ; j--) {
                             var secureDistance = (enemyCanSplit ? splitDangerDistance : normalDangerDistance);
@@ -976,7 +1115,7 @@ function AposBot() {
                         var tempList = this.addAngle(sortedInterList, stupidList[i]);
 
                         if (tempList.length == 0) {
-                            console.log("MAYDAY IT'S HAPPENING!");
+                            console.log("MAYDAY IT'S HAPPENING: " + new Date().toString());
                             break;
                         } else {
                             sortedInterList = tempList;
