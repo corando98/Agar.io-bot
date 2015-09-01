@@ -25,7 +25,7 @@ SOFTWARE.*/
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposLauncherVersion = 4.123;
+var aposLauncherVersion = 4.123002;
 var splitTimer = new Date();
 
 Number.prototype.mod = function(n) {
@@ -83,7 +83,7 @@ console.log("Running Bot Launcher!");
     function keyAction(e) {
       //t
         if (84 == e.keyCode) {
-            console.log("Toggle");
+            console.log("Toggle: " + toggle + "; " + new Date().toString() );
             toggle = !toggle;
         }
 
@@ -105,8 +105,8 @@ console.log("Running Bot Launcher!");
 
         // space
         if (32 == e.keyCode) {
-            console.log("space:  split");
             splitTimer = new Date();
+            console.log("split manually: " + splitTimer.toString() );
         }
 
 
