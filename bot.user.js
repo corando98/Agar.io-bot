@@ -278,14 +278,16 @@ function AposBot() {
             {
               if ( this.compareSize(blob, cell, 1.30) )
               {
-                //console.log( "not dupe, but threat");
+//                console.log( cell.name + ": not dupe, but threat");
                 return true;
               }
               else
               {
-                var threatSize = splitCellPlayers[ this.getNameSplitCell( cell ) ];
+                var cellName = this.getNameSplitCell( cell );
+                var threatSize = splitCellPlayers[ cellName ];
                 if ( this.compareSplitThreatSize(blob, threatSize, 1.30 ) )
                 {
+                  console.log( cellName + ": dupe and threat");
                   return true;
                 }
               }
