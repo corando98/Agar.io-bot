@@ -256,15 +256,6 @@ function AposBot() {
     };
 
 
-    // this.compareSplitCellSize = function(player1, cellSize, ratio) {
-    //         console.log( "comparing dupe size");
-    //         if (player1.size * player1.size * ratio < cellSize * cellSize) {
-    //             return true;
-    //         }
-    //         return false;
-    //     };
-
-
 
     this.isThreat = function(blob, cell) {
         if (!cell.isVirus() )
@@ -292,8 +283,8 @@ function AposBot() {
               }
               else
               {
-                var threatSize = splitCellPlayers[ cell.name ];
-                if ( this.compareSplitThreatSize(cell, threatSize, 1.30 ) )
+                var threatSize = splitCellPlayers[ this.getNameSplitCell( cell ) ];
+                if ( this.compareSplitThreatSize(blob, threatSize, 1.30 ) )
                 {
                   return true;
                 }
@@ -353,18 +344,8 @@ function AposBot() {
 
           var isMe = that.isItMe( player, blob );
 
-          //if ( ( null !== cellName || "" <> cellName ) &&
-                //( !that.isItMe( player, listToUse[element] ) ) )  {
-            //console.log( "name: (" + cellName + ");");
-          //}
-
-
-          // if ( CELL_NAME_VIRUS == cellName )
-          // {
-          //   console.log("eek!  it's a virus");
-          // }
-
-          if ( CELL_NAME_VIRUS !== cellName && !isMe )  {
+          if ( CELL_NAME_VIRUS !== cellName && !isMe )
+          {
 
             var size = splitCellPlayers[ cellName ];
             if (size > 0){
@@ -373,9 +354,7 @@ function AposBot() {
             } else {
               size = ~~cellSize;
             }
-          splitCellPlayers[ cellName ] = size;
-
-
+            splitCellPlayers[ cellName ] = size;
           }
 
 
