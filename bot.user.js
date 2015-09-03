@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63008
+// @version     3.63009
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.63008;
+var aposBotVersion = 3.63009;
 
 
 //TODO: Team mode
@@ -119,16 +119,16 @@ function AposBot() {
     this.toggleAB = true;
 
     this.keyAction = function(key) {
-      console.log( "bot keyAction");
-        if (81 == key.keyCode) {
-            console.log("Toggle Follow Mouse!");
+        if (81 == key.keyCode)
+        {
             this.toggleFollow = !this.toggleFollow;
+            console.log("Toggle Follow Mouse:" + this.toggleFollow +"; " + new Date().toString() );
         }
 
 
         if (65 == key.keyCode) {
-            console.log("ToggleAB");
             this.toggleAB = !this.toggleAB;
+            console.log("ToggleAB:" + this.toggleAB +"; " + new Date().toString() );
         }
 
 
@@ -287,7 +287,7 @@ function AposBot() {
                 var threatSize = splitCellPlayers[ cellName ];
                 if ( this.compareSplitThreatSize(blob, threatSize, 1.30 ) )
                 {
-                  console.log( cellName + ": dupe and threat");
+//                  console.log( "isThreat; name:" + cellName + "; cell size:" + cell.size + "; sum size:" + threatSize );
                   return true;
                 }
               }
@@ -335,28 +335,27 @@ function AposBot() {
           var blob = listToUse[element];
           var cellName = that.getNameSplitCell( blob );
           var cellSize = blob.size;
-          var MINIMIZE_CELL_SIZE = 21;
+          var MINIMUM_CELL_SIZE = 21;
           var CELL_NAME_VIRUS = '|#33ff33';
-
-          // if it's a tiny cell, don't count it.
-          if ( cellSize < MINIMIZE_CELL_SIZE )
-          {
-            cellSize = 0;
-          }
 
           var isMe = that.isItMe( player, blob );
 
-          if ( CELL_NAME_VIRUS !== cellName && !isMe )
+          // if it's a tiny cell, don't count it.
+          if ( cellSize < MINIMUM_CELL_SIZE )
+          {
+            cellSize = 0;
+          }
+          else if ( CELL_NAME_VIRUS !== cellName && !isMe )
           {
 
             var size = splitCellPlayers[ cellName ];
             if (size > 0){
-              size += ~~cellSize;
+              size += cellSize;
 //              console.log( "Split cell name: " + cellName +"; size: " + size );
             } else {
-              size = ~~cellSize;
+              size = cellSize;
             }
-            splitCellPlayers[ cellName ] = size;
+            splitCellPlayers[ cellName ] = ~~size;
           }
 
 
@@ -368,14 +367,14 @@ function AposBot() {
 
 
 
-    this.separateListBasedOnFunction = function(that, listToUse, blob) {
+    this.separateListBasedOnFunction = function(that, listToUse, blob, splitCellPlayers) {
         var foodElementList = [];
         var threatList = [];
         var virusList = [];
         var splitTargetList = [];
 
         var player = getPlayer();
-        var splitCellPlayers = [];
+//        var splitCellPlayers = [];
 
         that.findSplitCellNames( that, player, listToUse, splitCellPlayers );
 
@@ -417,15 +416,16 @@ function AposBot() {
             foodList.push([foodElementList[i].x, foodElementList[i].y, foodElementList[i].size]);
         }
 
-        return [foodList, threatList, virusList, splitTargetList, splitCellPlayers];
+//        return [foodList, threatList, virusList, splitTargetList, splitCellPlayers];
+        return [foodList, threatList, virusList, splitTargetList];
     };
 
-    this.getAll = function(blob) {
+    this.getAll = function( blob, allSplitCellPlayers ) {
         var dotList = [];
         var player = getPlayer();
         var interNodes = getMemoryCells();
 
-        dotList = this.separateListBasedOnFunction(this, interNodes, blob);
+        dotList = this.separateListBasedOnFunction(this, interNodes, blob, allSplitCellPlayers );
 
         return dotList;
     };
@@ -931,7 +931,9 @@ function AposBot() {
 
                     //loop through everything that is on the screen and
                     //separate everything in it's own category.
-                    var allIsAll = this.getAll(player[k]);
+                    var allSplitCellPlayers = [];
+
+                    var allIsAll = this.getAll( player[k], allSplitCellPlayers );
 
                     //The food stored in element 0 of allIsAll
                     var allPossibleFood = allIsAll[0];
@@ -940,7 +942,14 @@ function AposBot() {
                     //The viruses are stored in element 2 of allIsAll
                     var allPossibleViruses = allIsAll[2];
 
-                    var allSplitCellPlayers = allIsAll[3];
+                    //var allSplitCellPlayers = allIsAll[3];
+
+                    // for (var key in allSplitCellPlayers)
+                    // {
+                    //   var thisSize = allSplitCellPlayers[ key ];
+                    //   console.log( "mainLoop; key:" + key + "; size:" + thisSize );
+                    // }
+
 
                     //The bot works by removing angles in which it is too
                     //dangerous to travel towards to.
@@ -972,11 +981,15 @@ function AposBot() {
 
                         var normalDangerDistance = allPossibleThreats[i].size;
 
-                        var sumOfSplitSize = allSplitCellPlayers[ this.getNameSplitCell( thisThreat ) ];
+                        var threatName = this.getNameSplitCell( thisThreat );
+                        var sumOfSplitSize = allSplitCellPlayers[ threatName ];
+
                         if ( this.toggleAB )
                         {
                           if ( sumOfSplitSize > normalDangerDistance )
                           {
+                            console.log( "mainLoop; threat:" + threatName + "; sumOfSplitSize:" + sumOfSplitSize + "; size:" + normalDangerDistance);
+
                             normalDangerDistance = sumOfSplitSize;
                           }
                         }
