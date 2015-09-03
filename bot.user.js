@@ -126,7 +126,7 @@ function AposBot() {
         }
 
 
-        if (65 == e.keyCode) {
+        if (65 == key.keyCode) {
             console.log("ToggleAB");
             this.toggleAB = !this.toggleAB;
         }
