@@ -676,9 +676,11 @@ console.log("Running Bot Launcher!");
     function V() {
 
         //UPDATE
-        if (getPlayer().length == 0 && !reviving && ~~(getCurrentScore() / 100) > 0) {
-            var nbSeconds = ~~( (new Date().getTime() - lifeTimer.getTime() )/1000 );
-            console.log("Dead. size:" + ~~(getCurrentScore() / 100) + "; lifeTime:" + nbSeconds );
+        if (getPlayer().length == 0 && !reviving && ~~(getCurrentScore() / 100) > 0)
+        {
+            var now = new Date();
+            var nbSeconds = ~~( (now.getTime() - lifeTimer.getTime() )/1000 );
+            console.log("Dead\t" + ~~(getCurrentScore() / 100) + "\t" + nbSeconds + "\t" + now.toString() + "\t" + now.getTime() );
             apos('send', 'pageview');
         }
 
