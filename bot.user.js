@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63009
+// @version     3.63011
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.63009;
+var aposBotVersion = 3.63011;
 
 
 //TODO: Team mode
@@ -136,9 +136,10 @@ function AposBot() {
 
     this.displayText = function()
       {
-          var retText = "Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off") + "\n";
-          retText += "A - Toggle A/B: " + (this.toggleAB ? "On" : "Off");
-          return [retText];
+          var retText = [];
+          retText.push( "Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off") );
+          retText.push( "A - Toggle A/B: " + (this.toggleAB ? "On" : "Off" ) );
+          return retText;
     };
 
     this.splitDistance = 710;
@@ -988,7 +989,7 @@ function AposBot() {
                         {
                           if ( sumOfSplitSize > normalDangerDistance )
                           {
-                            console.log( "mainLoop; threat:" + threatName + "; sumOfSplitSize:" + sumOfSplitSize + "; size:" + normalDangerDistance);
+//                            console.log( "mainLoop; threat:" + threatName + "; sumOfSplitSize:" + sumOfSplitSize + "; size:" + normalDangerDistance);
 
                             normalDangerDistance = sumOfSplitSize;
                           }
