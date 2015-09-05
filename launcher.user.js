@@ -20,13 +20,14 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.123009
+// @version     4.123011
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposLauncherVersion = 4.123009;
+var aposLauncherVersion = 4.123011;
 var splitTimer = new Date();
+var previouslyWasSplit = false;
 
 Number.prototype.mod = function(n) {
     return ((this % n) + n) % n;
@@ -110,11 +111,11 @@ console.log("Running Bot Launcher!");
         }
 
 
-        // space
-        if (32 == e.keyCode) {
-            splitTimer = new Date();
-            console.log("split manually: " + splitTimer.toString() );
-        }
+        // // space
+        // if (32 == e.keyCode) {
+        //     splitTimer = new Date();
+        //     console.log("split manually: " + splitTimer.toString() );
+        // }
 
 
         //d
@@ -850,6 +851,16 @@ console.log("Running Bot Launcher!");
 
         var nbSeconds = 0;
         var splitSeconds = 0;
+
+        isSplit = window.botList[botIndex].amISplit;
+        if( !previouslyWasSplit && isSplit )
+        {
+          console.log( "just split" );
+          splitTimer = new Date();
+        }
+
+        previouslyWasSplit = isSplit;
+
         if (getPlayer().length > 0) {
             //nbSeconds = currentDate.getSeconds() + currentDate.getMinutes() * 60 + currentDate.getHours() * 3600 - lifeTimer.getSeconds() - lifeTimer.getMinutes() * 60 - lifeTimer.getHours() * 3600;
             nbSeconds = ~~( (currentDate.getTime() - lifeTimer.getTime() )/1000 );
@@ -860,7 +871,7 @@ console.log("Running Bot Launcher!");
         //var ttr = 30;
         var delayTilMerge = ~~(ttr - splitSeconds);
 
-        if (delayTilMerge < 0)
+        if (delayTilMerge < 0 || !isSplit )
         {
           delayTilMerge = 0;
         }
@@ -881,6 +892,8 @@ console.log("Running Bot Launcher!");
         !T() || W ? (x += b / 2E3, 1 < x && (x = 1)) : (x -= b / 300, 0 > x && (x = 0));
         0 < x && (f.fillStyle = "#000000", f.globalAlpha = .5 * x, f.fillRect(0, 0, m, r), f.globalAlpha = 1);
         ib = C
+
+
 
         drawStats(f);
     }

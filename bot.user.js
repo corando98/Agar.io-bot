@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63011
+// @version     3.63013
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.63011;
+var aposBotVersion = 3.63013;
 
 
 //TODO: Team mode
@@ -114,6 +114,8 @@ window.botList.push(new QuickBot());*/
 
 function AposBot() {
     this.name = "AposBot " + aposBotVersion;
+
+    this.amISplit = false;
 
     this.toggleFollow = false;
     this.toggleAB = true;
@@ -207,7 +209,9 @@ function AposBot() {
         return this.compareSize(player1, player2, 2.8) && !this.compareSize(player1, player2, 20);
     };
 
-    this.isItMe = function(player, cell) {
+    this.isItMe = function(player, cell)
+    {
+        var isMe = false;
         if (getMode() == ":teams") {
             var currentColor = player[0].color;
             var currentRed = currentColor.substring(1,3);
@@ -225,7 +229,7 @@ function AposBot() {
             var cellTeam = this.getTeam(cellRed, cellGreen, cellBlue);
 
             if (currentTeam == cellTeam && !cell.isVirus()) {
-                return true;
+                isMe = true;
             }
 
             //console.log("COLOR: " + color);
@@ -233,11 +237,11 @@ function AposBot() {
         } else {
             for (var i = 0; i < player.length; i++) {
                 if (cell.id == player[i].id) {
-                    return true;
+                    isMe = true;
                 }
             }
         }
-        return false;
+        return isMe;
     };
 
     this.getTeam = function(red, green, blue) {
@@ -329,38 +333,56 @@ function AposBot() {
 
 
 
-    this.findSplitCellNames = function(that, player, listToUse, splitCellPlayers ){
+    this.findSplitCellNames = function(that, player, listToUse, splitCellPlayers )
+      {
 
-
-          Object.keys(listToUse).forEach( function(element, index){
-          var blob = listToUse[element];
-          var cellName = that.getNameSplitCell( blob );
-          var cellSize = blob.size;
-          var MINIMUM_CELL_SIZE = 21;
-          var CELL_NAME_VIRUS = '|#33ff33';
-
-          var isMe = that.isItMe( player, blob );
-
-          // if it's a tiny cell, don't count it.
-          if ( cellSize < MINIMUM_CELL_SIZE )
+          var countMe = 0;
+          Object.keys(listToUse).forEach( function(element, index)
           {
-            cellSize = 0;
-          }
-          else if ( CELL_NAME_VIRUS !== cellName && !isMe )
-          {
+            var blob = listToUse[element];
+            var cellName = that.getNameSplitCell( blob );
+            var cellSize = blob.size;
+            var MINIMUM_CELL_SIZE = 21;
+            var CELL_NAME_VIRUS = '|#33ff33';
 
-            var size = splitCellPlayers[ cellName ];
-            if (size > 0){
-              size += cellSize;
-//              console.log( "Split cell name: " + cellName +"; size: " + size );
-            } else {
-              size = cellSize;
+            var isMe = that.isItMe( player, blob );
+            if ( isMe )
+            {
+              ++countMe;
             }
-            splitCellPlayers[ cellName ] = ~~size;
+
+            // if it's a tiny cell, don't count it.
+            if ( cellSize < MINIMUM_CELL_SIZE )
+            {
+              cellSize = 0;
+            }
+            else if ( CELL_NAME_VIRUS !== cellName && !isMe )
+            {
+
+              var size = splitCellPlayers[ cellName ];
+              if (size > 0)
+              {
+                size += cellSize;
+//              console.log( "Split cell name: " + cellName +"; size: " + size );
+              }
+              else
+              {
+                size = cellSize;
+              }
+              splitCellPlayers[ cellName ] = ~~size;
+            }
+          });
+
+          if ( countMe > 1 )
+          {
+//            console.log( "findSplitCellNames; I am split" );
+            that.amISplit = true;
           }
-
-
-        });
+          else
+          {
+//              console.log( "findSplitCellNames; I am whole" );
+              that.amISplit = false;
+          }
 
 
 
