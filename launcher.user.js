@@ -20,14 +20,14 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.123011
+// @version     4.123013
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposLauncherVersion = 4.123011;
+var aposLauncherVersion = 4.123013;
 var splitTimer = new Date();
-var previouslyWasSplit = false;
+var previousMyCellCount = 1;
 
 Number.prototype.mod = function(n) {
     return ((this % n) + n) % n;
@@ -187,7 +187,7 @@ console.log("Running Bot Launcher!");
                 if (Math.sqrt(b * b + c * c) <= m / 5 / 2) {
                     V();
                     H(17);
-                    return
+                    return;
                 }
             }
             fa = a.clientX;
@@ -852,14 +852,17 @@ console.log("Running Bot Launcher!");
         var nbSeconds = 0;
         var splitSeconds = 0;
 
-        isSplit = window.botList[botIndex].amISplit;
-        if( !previouslyWasSplit && isSplit )
+        var myCount = window.botList[botIndex].myCellCount;
+
+        // handle case of having been split and being split into more pieces.  reset split timer.
+        // in any event, if myCount is 1, then I didn't just split
+        if( (previousMyCellCount < myCount ) && (myCount-1) )
         {
-          console.log( "just split" );
+          console.log( "just split; previous:" + previousMyCellCount +"; myCount:" + myCount );
           splitTimer = new Date();
         }
 
-        previouslyWasSplit = isSplit;
+        previousMyCellCount = myCount;
 
         if (getPlayer().length > 0) {
             //nbSeconds = currentDate.getSeconds() + currentDate.getMinutes() * 60 + currentDate.getHours() * 3600 - lifeTimer.getSeconds() - lifeTimer.getMinutes() * 60 - lifeTimer.getHours() * 3600;
@@ -871,7 +874,8 @@ console.log("Running Bot Launcher!");
         //var ttr = 30;
         var delayTilMerge = ~~(ttr - splitSeconds);
 
-        if (delayTilMerge < 0 || !isSplit )
+        // don't allow merge timer to be negative or to be non-zero if I only have one cell
+        if (delayTilMerge < 0 || !(myCount-1) )
         {
           delayTilMerge = 0;
         }

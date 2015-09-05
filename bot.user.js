@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63015
+// @version     3.63017
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.63015;
+var aposBotVersion = 3.63017;
 
 
 //TODO: Team mode
@@ -115,7 +115,7 @@ window.botList.push(new QuickBot());*/
 function AposBot() {
     this.name = "AposBot " + aposBotVersion;
 
-    this.amISplit = false;
+    this.myCellCount = 1;
 
     this.toggleFollow = false;
     this.toggleAB = true;
@@ -337,7 +337,9 @@ function AposBot() {
     this.findSplitCellNames = function(that, player, listToUse )
       {
           var splitCellPlayers = [];
-          var countMe = 0;
+
+          that.myCellCount = 0;
+          
           Object.keys(listToUse).forEach( function(element, index)
           {
             var blob = listToUse[element];
@@ -347,9 +349,12 @@ function AposBot() {
             var CELL_NAME_VIRUS = '|#33ff33';
 
             var isMe = that.isItMe( player, blob );
+
+            // keep track of how many clones of myself exist.  it means I split
+
             if ( isMe )
             {
-              ++countMe;
+              ++that.myCellCount;
             }
 
             // if it's a tiny cell, don't count it.
@@ -374,16 +379,7 @@ function AposBot() {
             }
           });
 
-          if ( countMe > 1 )
-          {
-//            console.log( "findSplitCellNames; I am split" );
-            that.amISplit = true;
-          }
-          else
-          {
-//              console.log( "findSplitCellNames; I am whole" );
-              that.amISplit = false;
-          }
+
 
 
           return splitCellPlayers;
