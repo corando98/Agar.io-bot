@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63014
+// @version     3.63015
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.63014;
+var aposBotVersion = 3.63015;
 
 
 //TODO: Team mode
@@ -971,6 +971,13 @@ function AposBot() {
                     var allPossibleViruses = allIsAll[2];
 
                     var allSplitTargets = allIsAll[3];
+
+                    for( var i = 0; i < allSplitTargets.length; ++i)
+                    {
+                      var thisSplit = allSplitTargets[ i ];
+                      console.log( "mainLoop; name:" + thisSplit.name );
+                    }
+
 
                     var allSplitCellPlayers = allIsAll[4];
 
