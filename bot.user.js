@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63013
+// @version     3.63014
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.63013;
+var aposBotVersion = 3.63014;
 
 
 //TODO: Team mode
@@ -333,9 +333,10 @@ function AposBot() {
 
 
 
-    this.findSplitCellNames = function(that, player, listToUse, splitCellPlayers )
+//    this.findSplitCellNames = function(that, player, listToUse, splitCellPlayers )
+    this.findSplitCellNames = function(that, player, listToUse )
       {
-
+          var splitCellPlayers = [];
           var countMe = 0;
           Object.keys(listToUse).forEach( function(element, index)
           {
@@ -385,21 +386,22 @@ function AposBot() {
           }
 
 
-
+          return splitCellPlayers;
       };
 
 
 
-    this.separateListBasedOnFunction = function(that, listToUse, blob, splitCellPlayers) {
+    //this.separateListBasedOnFunction = function(that, listToUse, blob, splitCellPlayers) {
+    this.separateListBasedOnFunction = function(that, listToUse, blob ) {
+
         var foodElementList = [];
         var threatList = [];
         var virusList = [];
         var splitTargetList = [];
 
         var player = getPlayer();
-//        var splitCellPlayers = [];
-
-        that.findSplitCellNames( that, player, listToUse, splitCellPlayers );
+        var splitCellPlayers = that.findSplitCellNames( that, player, listToUse );
+//        that.findSplitCellNames( that, player, listToUse, splitCellPlayers );
 
         Object.keys(listToUse).forEach(function(element, index) {
             var isMe = that.isItMe(player, listToUse[element]);
@@ -439,16 +441,18 @@ function AposBot() {
             foodList.push([foodElementList[i].x, foodElementList[i].y, foodElementList[i].size]);
         }
 
-//        return [foodList, threatList, virusList, splitTargetList, splitCellPlayers];
-        return [foodList, threatList, virusList, splitTargetList];
+        return [foodList, threatList, virusList, splitTargetList, splitCellPlayers];
+//        return [foodList, threatList, virusList, splitTargetList];
     };
 
-    this.getAll = function( blob, allSplitCellPlayers ) {
+//    this.getAll = function( blob, allSplitCellPlayers ) {
+    this.getAll = function( blob ) {
         var dotList = [];
         var player = getPlayer();
         var interNodes = getMemoryCells();
 
-        dotList = this.separateListBasedOnFunction(this, interNodes, blob, allSplitCellPlayers );
+//        dotList = this.separateListBasedOnFunction(this, interNodes, blob, allSplitCellPlayers );
+        dotList = this.separateListBasedOnFunction(this, interNodes, blob );
 
         return dotList;
     };
@@ -956,7 +960,8 @@ function AposBot() {
                     //separate everything in it's own category.
                     var allSplitCellPlayers = [];
 
-                    var allIsAll = this.getAll( player[k], allSplitCellPlayers );
+//                    var allIsAll = this.getAll( player[k], allSplitCellPlayers );
+                    var allIsAll = this.getAll( player[k] );
 
                     //The food stored in element 0 of allIsAll
                     var allPossibleFood = allIsAll[0];
@@ -965,7 +970,9 @@ function AposBot() {
                     //The viruses are stored in element 2 of allIsAll
                     var allPossibleViruses = allIsAll[2];
 
-                    //var allSplitCellPlayers = allIsAll[3];
+                    var allSplitTargets = allIsAll[3];
+
+                    var allSplitCellPlayers = allIsAll[4];
 
                     // for (var key in allSplitCellPlayers)
                     // {
