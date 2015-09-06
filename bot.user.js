@@ -150,7 +150,7 @@ function AposBot() {
     };
 
     this.splitDistance = 710;
-
+    this.shouldSplitMe = false;
 
 
     this.splitMe = function()
@@ -158,6 +158,7 @@ function AposBot() {
         if ( !this.haveISplit )
         {
             this.haveISplit = true;
+            this.shouldSplitMe = false;
             f.opCode( 17 );
             console.log( "splitMe:" + this.haveISplit + ";" + new Date().toString() );
         }
@@ -951,9 +952,6 @@ function AposBot() {
             //Just to make sure the player is alive.
             if (player.length > 0) {
 
-                var shouldSplit = false;
-                // var didSplit = false;
-//                var didSplit = false;
                 //Loop through all the player's cells.
                 for (var k = 0; k < player.length; k++) {
                     if (true) {
@@ -1024,19 +1022,17 @@ function AposBot() {
                       {
                         console.log ( "splitting:" + new Date().toString() );
                         ++this.myCellCount;
-                        this.splitMe();
+                        this.shouldSplitMe = true;
+
+                        destinationChoices = [closestTarget.x, closestTarget.y];
+                        return destinationChoices;
+//                        this.splitMe();
+
                       }
                     }
 
 
 
-//                     if ( this.myCellCount === 1 ) //&& shouldSplit && !didSplit )
-//                     {
-// //                      didSplit = true;
-//                       this.splitMe();
-//                       ++this.myCellCount;
-// //                      shouldSplit = false;
-//                     }
 
 
 

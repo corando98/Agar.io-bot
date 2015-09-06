@@ -818,12 +818,25 @@ console.log("Running Bot Launcher!");
         for (d = 0; d < v.length; d++) v[d].w(f);
         for (d = 0; d < Q.length; d++) Q[d].w(f);
         //UPDATE
-        if (getPlayer().length > 0) {
-            var moveLoc = window.botList[botIndex].mainLoop();
-            if (!toggle) {
-                setPoint(moveLoc[0], moveLoc[1]);
-            }
-        }
+        if (getPlayer().length > 0)
+            {
+              var theBot = window.botList[ botIndex ];
+              var moveLoc = theBot.mainLoop();
+
+
+
+              if (!toggle)
+                {
+                  setPoint(moveLoc[0], moveLoc[1]);
+                }
+
+              if ( theBot.shouldSplitMe )
+                {
+                  theBot.splitMe();
+                }
+
+              }
+
         customRender(f);
         if (Ga) {
             na = (3 * na + Ea) / 4;
