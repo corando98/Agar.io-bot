@@ -870,8 +870,8 @@ console.log("Running Bot Launcher!");
         f.restore();
         z && z.width && f.drawImage(z, m - z.width - 10, 10);
 
-        R = Math.max(R, Bb());
-        // R = Bb();  // instant score
+//        R = Math.max(R, Bb());
+        R = Bb();  // instant score
 
         //UPDATE
 

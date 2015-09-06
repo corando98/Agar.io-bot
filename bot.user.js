@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63018
+// @version     3.63022
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.63018;
+var aposBotVersion = 3.63022;
 
 
 //TODO: Team mode
@@ -123,7 +123,11 @@ function AposBot() {
 
     this.autoSplitPercent = 0.5;
 
+    this.threatStandardRatio = 1.30;
+    this.threatSplitRatio = 0.5;
+
     this.haveISplit = false;
+    this.isDangerAfterSplitting = false;
 
     this.keyAction = function(key) {
         if (81 == key.keyCode)
@@ -303,47 +307,26 @@ function AposBot() {
 
 
 
-    this.isThreat = function(blob, cell) {
+    this.isThreat = function(blob, cell, ratio, splitCellPlayers)
+      {
         if (!cell.isVirus() )
         {
-          if ( this.compareSize(blob, cell, 1.30) )
-            {
-            //console.log( "not dupe, but threat");
+          if ( this.compareSize(blob, cell, ratio) )
+          {
             return true;
           }
-        return false;
-
-      }
-    };
-
-
-        this.isThreat = function(blob, cell, splitCellPlayers) {
-            // console.log( "isThreat");
-
-            if (!cell.isVirus() )
+          else if ( splitCellPlayers !== null )
+          {
+            var cellName = this.getNameSplitCell( cell );
+            var threatSize = splitCellPlayers[ cellName ];
+            if ( this.compareSplitThreatSize(blob, threatSize, ratio ) )
             {
-              if ( this.compareSize(blob, cell, 1.30) )
-              {
-//                console.log( cell.name + ": not dupe, but threat");
                 return true;
-              }
-              else
-              {
-                var cellName = this.getNameSplitCell( cell );
-                var threatSize = splitCellPlayers[ cellName ];
-                if ( this.compareSplitThreatSize(blob, threatSize, 1.30 ) )
-                {
-//                  console.log( "isThreat; name:" + cellName + "; cell size:" + cell.size + "; sum size:" + threatSize );
-                  return true;
-                }
-              }
-            return false;
-
+            }
           }
-        };
-
-
-
+          return false;
+        }
+      };
 
     this.isVirus = function(blob, cell) {
         if (cell.isVirus() && this.compareSize(cell, blob, 1.2)) {
@@ -427,8 +410,6 @@ function AposBot() {
       };
 
 
-
-    //this.separateListBasedOnFunction = function(that, listToUse, blob, splitCellPlayers) {
     this.separateListBasedOnFunction = function(that, listToUse, blob ) {
 
         var foodElementList = [];
@@ -447,26 +428,40 @@ function AposBot() {
 
 
 
-            if (!isMe) {
-                if (that.isFood(blob, listToUse[element]) && listToUse[element].isNotMoving()) {
+            if (!isMe)
+            {
+                if (that.isFood(blob, listToUse[element]) && listToUse[element].isNotMoving())
+                {
                     //IT'S FOOD!
                     foodElementList.push(listToUse[element]);
-
-
-                } else if (that.isThreat(blob, listToUse[element], splitCellPlayers ) ) {
+                }
+                else if (that.isThreat(blob, listToUse[element], that.threatStandardRatio, splitCellPlayers ) )
+                {
                     //IT'S DANGER!
                     var dangerCell = listToUse[element];
 
                     threatList.push( dangerCell );
-                } else if (that.isVirus(blob, listToUse[element])) {
+                }
+                else if (that.isVirus(blob, listToUse[element]))
+                {
                     //IT'S VIRUS!
                     virusList.push(listToUse[element]);
                 }
-                else if (that.isSplitTarget(that, blob, listToUse[element])) {
+                else if (that.isSplitTarget(that, blob, listToUse[element]))
+                {
                         drawCircle(listToUse[element].x, listToUse[element].y, listToUse[element].size + 50, 7);
                         splitTargetList.push(listToUse[element]);
                         foodElementList.push(listToUse[element]);
-                    }
+                }
+
+                // any possible dangers if I split?
+                if ( that.isThreat( blob, listToUse[ element ], that.threatSplitRatio, null ) )
+                {
+//                  console.log( "separateListBasedOnFunction; found threat after splitting:" + listToUse[ element ].name + ":" + new Date().toString() );
+                  that.isDangerAfterSplitting = true;
+                }
+
+
             }/*else if(isMe && (getBlobCount(getPlayer()) > 0)){
                 //Attempt to make the other cell follow the mother one
                 foodElementList.push(listToUse[element]);
@@ -488,7 +483,6 @@ function AposBot() {
         var player = getPlayer();
         var interNodes = getMemoryCells();
 
-//        dotList = this.separateListBasedOnFunction(this, interNodes, blob, allSplitCellPlayers );
         dotList = this.separateListBasedOnFunction(this, interNodes, blob );
 
         return dotList;
@@ -998,7 +992,22 @@ function AposBot() {
                     var allSplitCellPlayers = [];
 
 //                    var allIsAll = this.getAll( player[k], allSplitCellPlayers );
+
+                    this.isDangerAfterSplitting = false;
+
+
                     var allIsAll = this.getAll( player[k] );
+
+                    // if ( this.isDangerAfterSplitting )
+                    // {
+                    //   console.log( "DANGER after splitting:" + new Date().toString() );
+                    //
+                    // }
+                    // else
+                    // {
+                    //   console.log( "no danger found after splitting:" + new Date().toString() );
+                    // }
+
 
                     //The food stored in element 0 of allIsAll
                     var allPossibleFood = allIsAll[0];
@@ -1040,14 +1049,15 @@ function AposBot() {
                       }
                     }
 
+
                     // did we find a target?
                     if ( closestDistance < smallerSplitDistance )
                     {
                       console.log( "target acquired;" + closestTarget.name + "; distance:" + closestDistance );
 
 
-                      // am I whole?
-                      if ( this.myCellCount === 1 )
+                      // am I whole and is there no danger?
+                      if ( this.myCellCount === 1 && ! this.isDangerAfterSplitting )
                       {
                         console.log ( "wanting to split:" + new Date().toString() );
                         ++this.myCellCount;
