@@ -149,6 +149,18 @@ function AposBot() {
 
     this.splitDistance = 710;
 
+    var haveISplit = false;
+
+    this.splitMe = function()
+    {
+        if ( !haveISplit )
+        {
+            haveISplit = true;
+            f.opCode( 17 );
+            console.log( "splitMe:" + this.haveISplit + ";" + new Date().toString() );
+        }
+    };
+
     //Given an angle value that was gotten from valueAndleBased(),
     //returns a new value that scales it appropriately.
     this.paraAngleValue = function(angleValue, range) {
@@ -938,7 +950,7 @@ function AposBot() {
             if (player.length > 0) {
 
                 var shouldSplit = false;
-                var didSplit = false;
+                // var didSplit = false;
 //                var didSplit = false;
                 //Loop through all the player's cells.
                 for (var k = 0; k < player.length; k++) {
@@ -977,32 +989,52 @@ function AposBot() {
                     // to do:  make sure I don't consider my own cells as a target
 
 
+                    var closestDistance = this.splitDistance
+                    var closestTarget;
                     for( var i = 0; i < allSplitTargets.length; ++i)
                     {
-                      var thisSplit = allSplitTargets[ i ];
-                      var distance = ~~this.computeDistance( player[k].x, player[k].y, thisSplit.x, thisSplit.y );
-                      if ( this.splitDistance > distance )
-                      {
-                        console.log( "mainLoop; name:" + thisSplit.name + "; distance:" + distance );
-                        // var myKey;
-                        // myKey.keyCode = 32;
-                        // this.keyAction( myKey );
+                      var thisTarget = allSplitTargets[ i ];
+                      var distance = this.computeDistance( player[k].x, player[k].y, thisTarget.x, thisTarget.y );
 
-                        // var e = jQuery.Event("keypress");
-                        // e.which = 32; // # space
-                        // e.keyCode = 32;
-                        // jQuery( this ).trigger(e);
-                        shouldSplit = true;
+                      if ( distance < this.splitDistance )
+                      {
+                        console.log( "mainLoop; name:" + thisTarget.name + "; distance:" + distance );
+
+                        if ( distance < closestDistance )
+                        {
+                          closestDistance = distance;
+                          closestTarget = thisTarget;
+                        }
+
+
+
                       }
                     }
 
-                    if ( this.myCellCount === 1 && shouldSplit && !didSplit )
+                    // did we find a target?
+                    if ( closestDistance < this.splitDistance )
                     {
-                      didSplit = true;
-                      f.opCode( 17 );
-                      ++this.myCellCount;
-                      shouldSplit = false;
+                      console.log( "target acquired;" + closestTarget.name + "; distance:" + closestDistance );
+
+
+                      // am I whole?
+                      if ( this.myCellCount === 1 )
+                      {
+                        console.log ( "splitting:" + new Date().toString() );
+                        ++this.myCellCount;
+                        this.splitMe();
+                      }
                     }
+
+
+
+//                     if ( this.myCellCount === 1 ) //&& shouldSplit && !didSplit )
+//                     {
+// //                      didSplit = true;
+//                       this.splitMe();
+//                       ++this.myCellCount;
+// //                      shouldSplit = false;
+//                     }
 
 
 
