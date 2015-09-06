@@ -121,6 +121,8 @@ function AposBot() {
     this.toggleAB = true;
     this.toggleAutoSplit = true;
 
+    this.autoSplitPercent = 0.5;
+
     this.haveISplit = false;
 
     this.keyAction = function(key) {
@@ -141,6 +143,16 @@ function AposBot() {
             console.log("toggleAutoSplit:" + this.toggleAutoSplit +"; " + new Date().toString() );
         }
 
+        // it's a number greater than 0 and less than or equal to 9
+        if (48 < key.keyCode && key.keyCode <= 57 )
+        {
+            var theNumber = key.keyCode - 48;
+            theNumber /= 10;
+
+            this.autoSplitPercent = theNumber;
+            console.log("autoSplitPercent:" + this.autoSplitPercent +"; " + new Date().toString() );
+        }
+
 
 
     };
@@ -151,6 +163,7 @@ function AposBot() {
           retText.push( "Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off") );
           retText.push( "A - Toggle Larger Danger: " + (this.toggleAB ? "On" : "Off" ) );
           retText.push( "S - Toggle Auto Split: " + (this.toggleAutoSplit ? "On" : "Off" ) );
+          retText.push( "1-9 - Change Auto Split %: " + this.autoSplitPercent );
           return retText;
     };
 
@@ -998,8 +1011,8 @@ function AposBot() {
 
                     // to do:  make sure I don't consider my own cells as a target
 
-                    // arbitrary:  try 70% of normal split distance
-                    var smallerSplitDistance = ( ~~( this.splitDistance * 0.7) );
+                    // arbitrary:  try some % of normal split distance
+                    var smallerSplitDistance = ( ~~( this.splitDistance * this.autoSplitPercent) );
 
                     // reset before looping through targets.
                     this.shouldSplitMe = false;
