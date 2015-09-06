@@ -120,6 +120,8 @@ function AposBot() {
     this.toggleFollow = false;
     this.toggleAB = true;
 
+    this.haveISplit = false;
+
     this.keyAction = function(key) {
         if (81 == key.keyCode)
         {
@@ -149,13 +151,13 @@ function AposBot() {
 
     this.splitDistance = 710;
 
-    var haveISplit = false;
+
 
     this.splitMe = function()
     {
-        if ( !haveISplit )
+        if ( !this.haveISplit )
         {
-            haveISplit = true;
+            this.haveISplit = true;
             f.opCode( 17 );
             console.log( "splitMe:" + this.haveISplit + ";" + new Date().toString() );
         }

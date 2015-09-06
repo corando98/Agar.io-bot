@@ -875,9 +875,11 @@ console.log("Running Bot Launcher!");
         var delayTilMerge = ~~(ttr - splitSeconds);
 
         // don't allow merge timer to be negative or to be non-zero if I only have one cell
+        // reset ability to auto-split
         if (delayTilMerge < 0 || !(myCount-1) )
         {
           delayTilMerge = 0;
+          botList[botIndex].haveISplit = false;
         }
 
 
