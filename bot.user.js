@@ -133,6 +133,9 @@ function AposBot() {
             console.log("ToggleAB:" + this.toggleAB +"; " + new Date().toString() );
         }
 
+        if (32 == key.keyCode) {
+            console.log( "splitsville" );
+        }
 
     };
 
@@ -339,7 +342,7 @@ function AposBot() {
           var splitCellPlayers = [];
 
           that.myCellCount = 0;
-          
+
           Object.keys(listToUse).forEach( function(element, index)
           {
             var blob = listToUse[element];
@@ -934,6 +937,9 @@ function AposBot() {
             //Just to make sure the player is alive.
             if (player.length > 0) {
 
+                var shouldSplit = false;
+                var didSplit = false;
+//                var didSplit = false;
                 //Loop through all the player's cells.
                 for (var k = 0; k < player.length; k++) {
                     if (true) {
@@ -968,11 +974,38 @@ function AposBot() {
 
                     var allSplitTargets = allIsAll[3];
 
+                    // to do:  make sure I don't consider my own cells as a target
+
+
                     for( var i = 0; i < allSplitTargets.length; ++i)
                     {
                       var thisSplit = allSplitTargets[ i ];
-                      console.log( "mainLoop; name:" + thisSplit.name );
+                      var distance = ~~this.computeDistance( player[k].x, player[k].y, thisSplit.x, thisSplit.y );
+                      if ( this.splitDistance > distance )
+                      {
+                        console.log( "mainLoop; name:" + thisSplit.name + "; distance:" + distance );
+                        // var myKey;
+                        // myKey.keyCode = 32;
+                        // this.keyAction( myKey );
+
+                        // var e = jQuery.Event("keypress");
+                        // e.which = 32; // # space
+                        // e.keyCode = 32;
+                        // jQuery( this ).trigger(e);
+                        shouldSplit = true;
+                      }
                     }
+
+                    if ( this.myCellCount === 1 && shouldSplit && !didSplit )
+                    {
+                      didSplit = true;
+                      f.opCode( 17 );
+                      ++this.myCellCount;
+                      shouldSplit = false;
+                    }
+
+
+
 
 
                     var allSplitCellPlayers = allIsAll[4];

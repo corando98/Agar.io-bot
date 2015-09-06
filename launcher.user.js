@@ -716,7 +716,7 @@ console.log("Running Bot Launcher!");
     }
 
     window.opCode = function(a) {
-        console.log("Sending op code.");
+        console.log("Sending op code:" +new Date().toString() );
         H(parseInt(a));
     }
 
