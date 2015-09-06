@@ -24,12 +24,12 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63017
+// @version     3.63018
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposBotVersion = 3.63017;
+var aposBotVersion = 3.63018;
 
 
 //TODO: Team mode
@@ -155,13 +155,18 @@ function AposBot() {
 
     this.splitMe = function()
     {
+        var boolSuccess = false;
         if ( !this.haveISplit )
         {
             this.haveISplit = true;
             this.shouldSplitMe = false;
             f.opCode( 17 );
+            boolSuccess = true;
             console.log( "splitMe:" + this.haveISplit + ";" + new Date().toString() );
+
         }
+
+        return boolSuccess;
     };
 
     //Given an angle value that was gotten from valueAndleBased(),
@@ -988,15 +993,21 @@ function AposBot() {
 
                     // to do:  make sure I don't consider my own cells as a target
 
+                    // arbitrary:  try 70% of normal split distance
+                    var smallerSplitDistance = ( ~~( this.splitDistance * 0.7) );
 
-                    var closestDistance = this.splitDistance
+                    // reset before looping through targets.
+                    this.shouldSplitMe = false;
+
+
+                    var closestDistance = smallerSplitDistance;
                     var closestTarget;
                     for( var i = 0; i < allSplitTargets.length; ++i)
                     {
                       var thisTarget = allSplitTargets[ i ];
                       var distance = this.computeDistance( player[k].x, player[k].y, thisTarget.x, thisTarget.y );
 
-                      if ( distance < this.splitDistance )
+                      if ( distance < smallerSplitDistance )
                       {
                         console.log( "mainLoop; name:" + thisTarget.name + "; distance:" + distance );
 
@@ -1012,7 +1023,7 @@ function AposBot() {
                     }
 
                     // did we find a target?
-                    if ( closestDistance < this.splitDistance )
+                    if ( closestDistance < smallerSplitDistance )
                     {
                       console.log( "target acquired;" + closestTarget.name + "; distance:" + closestDistance );
 
@@ -1020,13 +1031,12 @@ function AposBot() {
                       // am I whole?
                       if ( this.myCellCount === 1 )
                       {
-                        console.log ( "splitting:" + new Date().toString() );
+                        console.log ( "wanting to split:" + new Date().toString() );
                         ++this.myCellCount;
                         this.shouldSplitMe = true;
 
                         destinationChoices = [closestTarget.x, closestTarget.y];
                         return destinationChoices;
-//                        this.splitMe();
 
                       }
                     }

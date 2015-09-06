@@ -20,12 +20,12 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.123013
+// @version     4.123014
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // ==/UserScript==
 
-var aposLauncherVersion = 4.123013;
+var aposLauncherVersion = 4.123014;
 var splitTimer = new Date();
 var previousMyCellCount = 1;
 
@@ -104,7 +104,7 @@ console.log("Running Bot Launcher!");
 
 
 
-        //s
+        //s:  reset score
         if (83 == e.keyCode) {
             console.log("reset score");
             R = Bb();
@@ -832,7 +832,22 @@ console.log("Running Bot Launcher!");
 
               if ( theBot.shouldSplitMe )
                 {
-                  theBot.splitMe();
+                  var previousScore = ~~(Bb()/100);
+                  if ( theBot.splitMe() )
+                    {
+                      var newScore = ~~(Bb()/100);
+
+                      if ( newScore > previousScore )
+                        {
+                          console.log( "successfull split:" + previousScore + " to " + newScore + ":" + new Date().toString() );
+                        }
+                      else
+                        {
+                          console.log ("failed split:" + newScore + ":" + new Date().toString() );
+                        }
+
+                    }
+
                 }
 
               }
