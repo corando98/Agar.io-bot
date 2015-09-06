@@ -104,9 +104,9 @@ console.log("Running Bot Launcher!");
 
 
 
-        //s:  reset score
-        if (83 == e.keyCode) {
-            console.log("reset score");
+        //z:  zero score
+        if (90 == e.keyCode) {
+            console.log("zero score");
             R = Bb();
         }
 

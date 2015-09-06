@@ -119,6 +119,7 @@ function AposBot() {
 
     this.toggleFollow = false;
     this.toggleAB = true;
+    this.toggleAutoSplit = true;
 
     this.haveISplit = false;
 
@@ -132,12 +133,15 @@ function AposBot() {
 
         if (65 == key.keyCode) {
             this.toggleAB = !this.toggleAB;
-            console.log("ToggleAB:" + this.toggleAB +"; " + new Date().toString() );
+            console.log("toggleAB:" + this.toggleAB +"; " + new Date().toString() );
         }
 
-        if (32 == key.keyCode) {
-            console.log( "splitsville" );
+        if (83 == key.keyCode) {
+            this.toggleAutoSplit = ! this.toggleAutoSplit;
+            console.log("toggleAutoSplit:" + this.toggleAutoSplit +"; " + new Date().toString() );
         }
+
+
 
     };
 
@@ -145,7 +149,8 @@ function AposBot() {
       {
           var retText = [];
           retText.push( "Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off") );
-          retText.push( "A - Toggle A/B: " + (this.toggleAB ? "On" : "Off" ) );
+          retText.push( "A - Toggle Larger Danger: " + (this.toggleAB ? "On" : "Off" ) );
+          retText.push( "S - Toggle Auto Split: " + (this.toggleAutoSplit ? "On" : "Off" ) );
           return retText;
     };
 
@@ -156,7 +161,7 @@ function AposBot() {
     this.splitMe = function()
     {
         var boolSuccess = false;
-        if ( !this.haveISplit )
+        if ( this.toggleAutoSplit && !this.haveISplit )
         {
             this.haveISplit = true;
             this.shouldSplitMe = false;
