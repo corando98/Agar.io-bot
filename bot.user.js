@@ -24,14 +24,13 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63026
+// @version     3.63029
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // @require     http://www.parsecdn.com/js/parse-1.5.0.min.js
 // ==/UserScript==
 
-var aposBotVersion = 3.63026;
-
+var aposBotVersion = 3.63029;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -87,13 +86,6 @@ function getLatestCommit() {
                     update("aposBot", "bot.user.js", "https://github.com/Apostolique/Agar.io-bot/blob/" + sha + "/bot.user.js/");
                 }
                 console.log('Current bot.user.js Version: ' + myVersion + " on Github: " + latestVersion);
-//                ga('send', 'pageview');
-
-                Parse.initialize("x2d1G5j0W8TKuoS2QInjmF8sLmYyFAxxKjBqa0yY", "9H2ShfX1BHB0NCEKtnYDiLL1AT6Uw367NHHZyYNx");
-                // var DeathStat = Parse.Object.extend( "Death Stat" );
-                // var ds = new DeathStat();
-                // ds.save( {"got here"} );
-
             });
 
         }).fail(function() {});
@@ -127,6 +119,12 @@ window.botList.push(new QuickBot());*/
 function AposBot() {
     this.name = "AposBot " + aposBotVersion;
     this.botVersion = aposBotVersion;
+    this.botIp = "";
+
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", "https://api.ipify.org/", false ); // false for synchronous request
+    xmlHttp.send( null );
+    this.botIp = xmlHttp.responseText;
 
     this.myCellCount = 1;
 

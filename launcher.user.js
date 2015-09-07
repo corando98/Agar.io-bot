@@ -20,13 +20,13 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.123022
+// @version     4.123023
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // @require     http://www.parsecdn.com/js/parse-1.5.0.min.js
 // ==/UserScript==
 
-var aposLauncherVersion = 4.123022;
+var aposLauncherVersion = 4.123023;
 var splitTimer = new Date();
 var previousMyCellCount = 1;
 
@@ -37,8 +37,6 @@ Number.prototype.mod = function(n) {
 Array.prototype.peek = function() {
     return this[this.length - 1];
 };
-
-
 
 var sha = "efde0488cc2cc176db48dd23b28a20b90314352b";
 function getLatestCommit() {
@@ -74,6 +72,7 @@ function getLatestCommit() {
                     //update("aposLauncher", "launcher.user.js", "https://github.com/Apostolique/Agar.io-bot/blob/" + sha + "/launcher.user.js/");
                 //}
                 console.log('Current launcher.user.js Version: ' + myVersion + " on Github: " + latestVersion);
+
 
             });
 
@@ -702,9 +701,8 @@ console.log("Running Bot Launcher!");
                       launcherVersion: aposLauncherVersion,
                       botVersion: theBot.botVersion,
                       voluntarySplitCounter : theBot.voluntarySplitCounter,
-                      virusCounter : theBot.virusCounter - theBot.voluntarySplitCounter} );
-
-
+                      virusCounter : theBot.virusCounter - theBot.voluntarySplitCounter,
+                      ipAddress: theBot.botIp } );
 
 
             apos('send', 'pageview');
