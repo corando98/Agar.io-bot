@@ -20,12 +20,13 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.123014
+// @version     4.123022
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
+// @require     http://www.parsecdn.com/js/parse-1.5.0.min.js
 // ==/UserScript==
 
-var aposLauncherVersion = 4.123014;
+var aposLauncherVersion = 4.123022;
 var splitTimer = new Date();
 var previousMyCellCount = 1;
 
@@ -36,6 +37,8 @@ Number.prototype.mod = function(n) {
 Array.prototype.peek = function() {
     return this[this.length - 1];
 };
+
+
 
 var sha = "efde0488cc2cc176db48dd23b28a20b90314352b";
 function getLatestCommit() {
@@ -71,6 +74,7 @@ function getLatestCommit() {
                     //update("aposLauncher", "launcher.user.js", "https://github.com/Apostolique/Agar.io-bot/blob/" + sha + "/launcher.user.js/");
                 //}
                 console.log('Current launcher.user.js Version: ' + myVersion + " on Github: " + latestVersion);
+
             });
 
         }).fail(function() {});
@@ -674,24 +678,52 @@ console.log("Running Bot Launcher!");
         }
     }
 
+
     function V() {
 
+      var now, nbSeconds, score;
+      var theBot = window.botList[ botIndex ];
         //UPDATE
         if (getPlayer().length == 0 && !reviving && ~~(getCurrentScore() / 100) > 0)
         {
-            var now = new Date();
-            var nbSeconds = ~~( (now.getTime() - lifeTimer.getTime() )/1000 );
-            console.log("Dead\t" + ~~(getCurrentScore() / 100) + "\t" + nbSeconds + "\t" + now.toString() + "\t" + now.getTime() );
+            now = new Date();
+            nbSeconds = ~~( (now.getTime() - lifeTimer.getTime() )/1000 );
+            myScore = ~~(getCurrentScore() / 100);
+            console.log("Dead\t" + myScore + "\t" + nbSeconds + "\t" + now.toString() + "\t" + now.getTime() );
+
+            Parse.initialize("x2d1G5j0W8TKuoS2QInjmF8sLmYyFAxxKjBqa0yY", "9H2ShfX1BHB0NCEKtnYDiLL1AT6Uw367NHHZyYNx");
+
+            var DeathStat = Parse.Object.extend( "DeathStat" );
+            var ds = new DeathStat();
+            ds.save( {score: myScore,
+                      secondsLife: nbSeconds,
+                      dateOfDeath: now.toString(),
+                      autoSplitPercent: theBot.autoSplitPercent,
+                      launcherVersion: aposLauncherVersion,
+                      botVersion: theBot.botVersion,
+                      voluntarySplitCounter : theBot.voluntarySplitCounter,
+                      virusCounter : theBot.virusCounter - theBot.voluntarySplitCounter} );
+
+
+
+
             apos('send', 'pageview');
+            // ga('send', 'Died', 'Life', 'Died', 'Size', score );
+            // ga('send', 'Died', 'Life', 'Died', 'Lifetime', nbSeconds );
+
         }
 
         if (getPlayer().length == 0) {
-            console.log("Revive");
+            console.log("Revive: " + new Date().toString() );
             setNick(originalName);
             reviving = true;
         } else if (getPlayer().length > 0 && reviving) {
             reviving = false;
             console.log("Done Reviving: " + new Date().toString() );
+            theBot.resetAutoSplitPercent();
+            theBot.virusCounter = 0;
+            theBot.voluntarySplitCounter = 0;
+//            ga('send', 'pageview');
         }
 
         if (T()) {
@@ -870,8 +902,8 @@ console.log("Running Bot Launcher!");
         f.restore();
         z && z.width && f.drawImage(z, m - z.width - 10, 10);
 
-//        R = Math.max(R, Bb());
-        R = Bb();  // instant score
+        R = Math.max(R, Bb());
+//        R = Bb();  // instant score
 
         //UPDATE
 
@@ -880,13 +912,15 @@ console.log("Running Bot Launcher!");
         var nbSeconds = 0;
         var splitSeconds = 0;
 
-        var myCount = window.botList[botIndex].myCellCount;
+        var theBot = window.botList[botIndex];
+        var myCount = theBot.myCellCount;
 
         // handle case of having been split and being split into more pieces.  reset split timer.
         // in any event, if myCount is 1, then I didn't just split
         if( (previousMyCellCount < myCount ) && (myCount-1) )
         {
           console.log( "just split; previous:" + previousMyCellCount +"; myCount:" + myCount );
+          ++theBot.virusCounter;
           splitTimer = new Date();
         }
 
@@ -914,7 +948,7 @@ console.log("Running Bot Launcher!");
         bestTime = Math.max(nbSeconds, bestTime);
 
 //        var displayText = 'Score: ' + ~~(R / 100) + " Current Time: " + nbSeconds + " seconds.";
-        var displayText = 'Score: ' + ~~(R / 100) + " Current Time: " + nbSeconds + " sec; re-merge: " +delayTilMerge + " sec.";
+        var displayText = "Score: " + ~~(R / 100) + " Current Time: " + nbSeconds + " sec; re-merge: " +delayTilMerge + " sec; splits: " + theBot.voluntarySplitCounter + "; viruses: " + (theBot.virusCounter - theBot.voluntarySplitCounter);
 
         0 != R && (null == ua && (ua = new va(24, "#FFFFFF")), ua.C(displayText), c = ua.L(), a = c.width, f.globalAlpha = .2, f.fillStyle = "#000000", f.fillRect(10, r - 10 - 24 - 10, a + 10, 34), f.globalAlpha = 1, f.drawImage(c, 15, r -
             10 - 24 - 5));
@@ -2526,7 +2560,7 @@ console.log("Running Bot Launcher!");
     m.parentNode.insertBefore(a, m)
 })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'apos');
 
-apos('create', 'UA-64394184-1', 'auto');
+apos('create', 'UA-50235119-3', 'auto');
 apos('send', 'pageview');
 
 window.ignoreStream = false;

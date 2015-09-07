@@ -24,12 +24,13 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63022
+// @version     3.63026
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
+// @require     http://www.parsecdn.com/js/parse-1.5.0.min.js
 // ==/UserScript==
 
-var aposBotVersion = 3.63022;
+var aposBotVersion = 3.63026;
 
 
 //TODO: Team mode
@@ -46,6 +47,8 @@ Number.prototype.mod = function(n) {
 Array.prototype.peek = function() {
     return this[this.length - 1];
 };
+
+
 
 
 
@@ -84,6 +87,13 @@ function getLatestCommit() {
                     update("aposBot", "bot.user.js", "https://github.com/Apostolique/Agar.io-bot/blob/" + sha + "/bot.user.js/");
                 }
                 console.log('Current bot.user.js Version: ' + myVersion + " on Github: " + latestVersion);
+//                ga('send', 'pageview');
+
+                Parse.initialize("x2d1G5j0W8TKuoS2QInjmF8sLmYyFAxxKjBqa0yY", "9H2ShfX1BHB0NCEKtnYDiLL1AT6Uw367NHHZyYNx");
+                // var DeathStat = Parse.Object.extend( "Death Stat" );
+                // var ds = new DeathStat();
+                // ds.save( {"got here"} );
+
             });
 
         }).fail(function() {});
@@ -112,14 +122,18 @@ window.botList = window.botList || [];
 
 window.botList.push(new QuickBot());*/
 
+
+
 function AposBot() {
     this.name = "AposBot " + aposBotVersion;
+    this.botVersion = aposBotVersion;
 
     this.myCellCount = 1;
 
     this.toggleFollow = false;
     this.toggleAB = true;
     this.toggleAutoSplit = true;
+    this.toggleIgnoreDanger = false;
 
     this.autoSplitPercent = 0.5;
 
@@ -128,6 +142,10 @@ function AposBot() {
 
     this.haveISplit = false;
     this.isDangerAfterSplitting = false;
+
+    this.voluntarySplitCounter = 0;
+    this.virusCounter = 0;
+
 
     this.keyAction = function(key) {
         if (81 == key.keyCode)
@@ -146,6 +164,19 @@ function AposBot() {
             this.toggleAutoSplit = ! this.toggleAutoSplit;
             console.log("toggleAutoSplit:" + this.toggleAutoSplit +"; " + new Date().toString() );
         }
+
+        if (83 == key.keyCode) {
+            this.toggleAutoSplit = ! this.toggleAutoSplit;
+            console.log("toggleAutoSplit:" + this.toggleAutoSplit +"; " + new Date().toString() );
+        }
+
+        // I
+        if (73 == key.keyCode) {
+            this.toggleIgnoreDanger = ! this.toggleIgnoreDanger;
+            console.log("toggleIgnoreDanger:" + this.toggleIgnoreDanger +"; " + new Date().toString() );
+        }
+
+
 
         // it's a number greater than 0 and less than or equal to 9
         if (48 < key.keyCode && key.keyCode <= 57 )
@@ -167,6 +198,7 @@ function AposBot() {
           retText.push( "Q - Follow Mouse: " + (this.toggleFollow ? "On" : "Off") );
           retText.push( "A - Toggle Larger Danger: " + (this.toggleAB ? "On" : "Off" ) );
           retText.push( "S - Toggle Auto Split: " + (this.toggleAutoSplit ? "On" : "Off" ) );
+          retText.push( "I - Toggle Ignore Danger: " + (this.toggleIgnoreDanger ? "On" : "Off" ) );
           retText.push( "1-9 - Change Auto Split %: " + this.autoSplitPercent );
           return retText;
     };
@@ -183,6 +215,7 @@ function AposBot() {
             this.haveISplit = true;
             this.shouldSplitMe = false;
             f.opCode( 17 );
+            ++this.voluntarySplitCounter;
             boolSuccess = true;
             console.log( "splitMe:" + this.haveISplit + ";" + new Date().toString() );
 
@@ -190,6 +223,19 @@ function AposBot() {
 
         return boolSuccess;
     };
+
+
+    this.randomIntFromInterval = function(min,max)
+        {
+            return Math.floor(Math.random()*(max-min+1)+min);
+        };
+
+    this.resetAutoSplitPercent = function()
+    {
+      this.autoSplitPercent = this.randomIntFromInterval( 0, 100 ) / 100;
+    };
+
+
 
     //Given an angle value that was gotten from valueAndleBased(),
     //returns a new value that scales it appropriately.
@@ -1057,7 +1103,7 @@ function AposBot() {
 
 
                       // am I whole and is there no danger?
-                      if ( this.myCellCount === 1 && ! this.isDangerAfterSplitting )
+                      if ( this.myCellCount === 1 && ( ! this.isDangerAfterSplitting || this.toggleIgnoreDanger ) )
                       {
                         console.log ( "wanting to split:" + new Date().toString() );
                         ++this.myCellCount;
@@ -1475,4 +1521,4 @@ function AposBot() {
 };
 window.botList.push(new AposBot());
 
-window.updateBotList(); //This function might not exist yet.
+//window.updateBotList(); //This function might not exist yet.
