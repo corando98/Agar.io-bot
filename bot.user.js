@@ -24,13 +24,13 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63029
+// @version     3.63032
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // @require     http://www.parsecdn.com/js/parse-1.5.0.min.js
 // ==/UserScript==
 
-var aposBotVersion = 3.63029;
+var aposBotVersion = 3.63032;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -361,7 +361,7 @@ function AposBot() {
           }
           else if ( splitCellPlayers !== null )
           {
-            var cellName = this.getNameSplitCell( cell );
+            var cellName = this.getNamePlayerCell( cell );
             var threatSize = splitCellPlayers[ cellName ];
             if ( this.compareSplitThreatSize(blob, threatSize, ratio ) )
             {
@@ -394,7 +394,7 @@ function AposBot() {
 
     // name is combination of given name + color to differentiate players
     // that pick same names but should be considered differentiate
-    this.getNameSplitCell = function( cell ) {
+    this.getNamePlayerCell = function( cell ) {
       return cell.name + "|" + cell.color;
     };
 
@@ -411,7 +411,7 @@ function AposBot() {
           Object.keys(listToUse).forEach( function(element, index)
           {
             var blob = listToUse[element];
-            var cellName = that.getNameSplitCell( blob );
+            var cellName = that.getNamePlayerCell( blob );
             var cellSize = blob.size;
             var MINIMUM_CELL_SIZE = 21;
             var CELL_NAME_VIRUS = '|#33ff33';
@@ -983,6 +983,92 @@ function AposBot() {
         return angle;
     };
 
+    this.targetHistory = [];
+
+    this.print = function( cell )
+    {
+        var retVal = "(" + ~~cell.x + "," + ~~cell.y + ");";
+        return retVal;
+    };
+
+
+
+    this.trackTargets = function( allSplitTargets )
+    {
+      for( var i = 0; i < allSplitTargets.length; ++i )
+      {
+        var target = allSplitTargets[ i ];
+        var name = this.getNamePlayerCell( target);
+
+        // for debugging, skip players w/o name
+        if ( ! target.name )
+        {
+          continue;
+        }
+
+        console.log( "trackTargets:" + name + ";" + this.print( target ) +":" + new Date().toString() );
+
+        // // skip split players
+        // if ( allSplitCellPlayers[ name ] )
+        // {
+        //   console.log( "trackTargets skipping:" + name );
+        //   continue;
+        // }
+
+      }
+    };
+
+      //
+      //
+      //   var history = this.targetHistory[ name ];
+      //
+      //   // initialize
+      //   if ( history === undefined )
+      //   {
+      //     // console.log( "init history for:" + name );
+      //     var newHistory = [];
+      //     newHistory.push( target );
+      //     this.targetHistory[ name ] = newHistory;
+      //   }
+      //   else
+      //   {
+      //     console.log( name + ":history:" + history.length );
+      //     // console.log( "adding history for:" + name );
+      //     var prevTarget = history[ history.length - 1 ];
+      //
+      //     if ( prevTarget.x != target.x && prevTarget.y != target.y )
+      //     {
+      //       // console.log( "target different:" + name );
+      //         history.push( target );
+      //         this.targetHistory[ name ] = history;
+      //       // console.log( "prev(" + prevTarget.x +"," + prevTarget.y +")" );
+      //       // console.log( "now(" + target.x +"," + target.y +")" );
+      //
+      //         var j = history.length;
+      //
+      //       // we have history, and we have at least 4 points
+      //         if ( history && j > 3 )
+      //         {
+      //           var deltaX1 = ( history[j-4].x - history[j-3].x );
+      //           var deltaX2 = ( history[j-3].x - history[j-2].x );
+      //           var deltaX = (deltaX1 + deltaX2)/2;
+      //           var predX = history[j-2].x - deltaX;
+      //
+      //
+      //           var deltaY1 = ( history[j-4].y - history[j-3].y );
+      //           var deltaY2 = ( history[j-3].y - history[j-2].y );
+      //           var deltaY = (deltaY1 + deltaY2)/2;
+      //           var predY = history[j-2].y - deltaY;
+      //           console.log( name + ":pred pts:" + this.print( history[j-4] ) + this.print( history[j-3] ) + this.print( history[j-2] ) );
+      //           console.log( name + ":prediction:(" + predX + "," + predY + "); actual" + this.print( history[j-1] ) );
+      //         }
+      //       }
+      //     }
+      //   }
+      // };
+      //
+
+
     /**
      * This is the main bot logic. This is called quite often.
      * @return A 2 dimensional array with coordinates for every cells.  [[x, y], [x, y]]
@@ -1062,6 +1148,9 @@ function AposBot() {
 
                     var allSplitTargets = allIsAll[3];
 
+                    // do nothing for now.  track targets and make predictions.
+                    this.trackTargets( allPossibleThreats );
+
                     // to do:  make sure I don't consider my own cells as a target
 
                     // arbitrary:  try some % of normal split distance
@@ -1080,7 +1169,7 @@ function AposBot() {
 
                       if ( distance < smallerSplitDistance )
                       {
-                        console.log( "mainLoop; name:" + thisTarget.name + "; distance:" + distance );
+                        // console.log( "mainLoop; name:" + thisTarget.name + "; distance:" + distance );
 
                         if ( distance < closestDistance )
                         {
@@ -1097,13 +1186,13 @@ function AposBot() {
                     // did we find a target?
                     if ( closestDistance < smallerSplitDistance )
                     {
-                      console.log( "target acquired;" + closestTarget.name + "; distance:" + closestDistance );
+                      // console.log( "target acquired;" + closestTarget.name + "; distance:" + closestDistance );
 
 
                       // am I whole and is there no danger?
                       if ( this.myCellCount === 1 && ( ! this.isDangerAfterSplitting || this.toggleIgnoreDanger ) )
                       {
-                        console.log ( "wanting to split:" + new Date().toString() );
+                        // console.log ( "wanting to split:" + new Date().toString() );
                         ++this.myCellCount;
                         this.shouldSplitMe = true;
 
@@ -1159,7 +1248,7 @@ function AposBot() {
 
                         var normalDangerDistance = allPossibleThreats[i].size;
 
-                        var threatName = this.getNameSplitCell( thisThreat );
+                        var threatName = this.getNamePlayerCell( thisThreat );
                         var sumOfSplitSize = allSplitCellPlayers[ threatName ];
 
                         if ( this.toggleAB )
