@@ -20,13 +20,13 @@ SOFTWARE.*/
 // @name        AposLauncher
 // @namespace   AposLauncher
 // @include     http://agar.io/*
-// @version     4.123024
+// @version     4.123027
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // @require     http://www.parsecdn.com/js/parse-1.5.0.min.js
 // ==/UserScript==
 
-var aposLauncherVersion = 4.123024;
+var aposLauncherVersion = 4.123027;
 var splitTimer = new Date();
 var previousMyCellCount = 1;
 
@@ -867,14 +867,14 @@ console.log("Running Bot Launcher!");
                     {
                       var newScore = ~~(Bb()/100);
 
-                      if ( newScore > previousScore )
-                        {
-                          console.log( "successfull split:" + previousScore + " to " + newScore + ":" + new Date().toString() );
-                        }
-                      else
-                        {
-                          console.log ("failed split:" + newScore + ":" + new Date().toString() );
-                        }
+                      // if ( newScore > previousScore )
+                      //   {
+                      //     console.log( "successfull split:" + previousScore + " to " + newScore + ":" + new Date().toString() );
+                      //   }
+                      // else
+                      //   {
+                      //     console.log ("failed split:" + newScore + ":" + new Date().toString() );
+                      //   }
 
                     }
 
@@ -2560,7 +2560,7 @@ console.log("Running Bot Launcher!");
     m.parentNode.insertBefore(a, m)
 })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'apos');
 
-apos('create', 'UA-50235119-3', 'auto');
+apos('create', 'UA-64394184-1', 'auto');
 apos('send', 'pageview');
 
 window.ignoreStream = false;

@@ -24,13 +24,13 @@ SOFTWARE.*/
 // @name        AposBot
 // @namespace   AposBot
 // @include     http://agar.io/*
-// @version     3.63032
+// @version     3.63035
 // @grant       none
 // @author      http://www.twitch.tv/apostolique
 // @require     http://www.parsecdn.com/js/parse-1.5.0.min.js
 // ==/UserScript==
 
-var aposBotVersion = 3.63032;
+var aposBotVersion = 3.63035;
 
 //TODO: Team mode
 //      Detect when people are merging
@@ -474,35 +474,43 @@ function AposBot() {
 
             if (!isMe)
             {
-                if (that.isFood(blob, listToUse[element]) && listToUse[element].isNotMoving())
+                var theOtherCell = listToUse[element];
+                if (that.isFood(blob, theOtherCell) && theOtherCell.isNotMoving() )
                 {
                     //IT'S FOOD!
-                    foodElementList.push(listToUse[element]);
+                    foodElementList.push(theOtherCell);
                 }
-                else if (that.isThreat(blob, listToUse[element], that.threatStandardRatio, splitCellPlayers ) )
+                else if (that.isThreat(blob, theOtherCell, that.threatStandardRatio, splitCellPlayers ) )
                 {
                     //IT'S DANGER!
-                    var dangerCell = listToUse[element];
-
-                    threatList.push( dangerCell );
+                    threatList.push( theOtherCell );
                 }
-                else if (that.isVirus(blob, listToUse[element]))
+                else if (that.isVirus(blob, theOtherCell))
                 {
                     //IT'S VIRUS!
-                    virusList.push(listToUse[element]);
+                    virusList.push(theOtherCell);
                 }
-                else if (that.isSplitTarget(that, blob, listToUse[element]))
+                else if (that.isSplitTarget(that, blob, theOtherCell))
                 {
-                        drawCircle(listToUse[element].x, listToUse[element].y, listToUse[element].size + 50, 7);
-                        splitTargetList.push(listToUse[element]);
-                        foodElementList.push(listToUse[element]);
+                        drawCircle(theOtherCell.x, theOtherCell.y, theOtherCell.size + 50, 7);
+                        splitTargetList.push(theOtherCell);
+                        foodElementList.push(theOtherCell);
                 }
 
                 // any possible dangers if I split?
                 if ( that.isThreat( blob, listToUse[ element ], that.threatSplitRatio, null ) )
                 {
 //                  console.log( "separateListBasedOnFunction; found threat after splitting:" + listToUse[ element ].name + ":" + new Date().toString() );
-                  that.isDangerAfterSplitting = true;
+//                  console.log( "player size:" + blob.size + "; other:" + theOtherCell.size );
+
+                  var dangerZone = blob.size + that.splitDistance + theOtherCell.size;
+                  var distance = that.computeDistance( blob.x, blob.y, theOtherCell.x, theOtherCell.y);
+
+                  if ( distance < dangerZone )
+                  {
+//                      console.log( "dangerZone:" + dangerZone +"; distance:" + distance);
+                      that.isDangerAfterSplitting = true;
+                  }
                 }
 
 
@@ -1006,67 +1014,94 @@ function AposBot() {
           continue;
         }
 
-        console.log( "trackTargets:" + name + ";" + this.print( target ) +":" + new Date().toString() );
+        // console.log( "trackTargets:" + name + ";" + this.print( target ) +":" + new Date().toString() );
 
-        // // skip split players
-        // if ( allSplitCellPlayers[ name ] )
-        // {
-        //   console.log( "trackTargets skipping:" + name );
-        //   continue;
-        // }
 
+
+        var history = this.targetHistory[ name ];
+
+        // initialize
+        if ( history === undefined )
+        {
+          // console.log( "init history for:" + name );
+          var newHistory = [];
+          newHistory.push( { "name": name,
+                             "x": target.x,
+                             "y": target.y } );
+          this.targetHistory[ name ] = newHistory;
+        }
+        else
+        {
+          history.push( { "name": name,
+                          "x": target.x,
+                          "y": target.y } );
+        }
       }
     };
 
-      //
-      //
-      //   var history = this.targetHistory[ name ];
-      //
-      //   // initialize
-      //   if ( history === undefined )
-      //   {
-      //     // console.log( "init history for:" + name );
-      //     var newHistory = [];
-      //     newHistory.push( target );
-      //     this.targetHistory[ name ] = newHistory;
-      //   }
-      //   else
-      //   {
-      //     console.log( name + ":history:" + history.length );
-      //     // console.log( "adding history for:" + name );
-      //     var prevTarget = history[ history.length - 1 ];
-      //
-      //     if ( prevTarget.x != target.x && prevTarget.y != target.y )
-      //     {
-      //       // console.log( "target different:" + name );
-      //         history.push( target );
-      //         this.targetHistory[ name ] = history;
-      //       // console.log( "prev(" + prevTarget.x +"," + prevTarget.y +")" );
-      //       // console.log( "now(" + target.x +"," + target.y +")" );
-      //
-      //         var j = history.length;
-      //
-      //       // we have history, and we have at least 4 points
-      //         if ( history && j > 3 )
-      //         {
-      //           var deltaX1 = ( history[j-4].x - history[j-3].x );
-      //           var deltaX2 = ( history[j-3].x - history[j-2].x );
-      //           var deltaX = (deltaX1 + deltaX2)/2;
-      //           var predX = history[j-2].x - deltaX;
-      //
-      //
-      //           var deltaY1 = ( history[j-4].y - history[j-3].y );
-      //           var deltaY2 = ( history[j-3].y - history[j-2].y );
-      //           var deltaY = (deltaY1 + deltaY2)/2;
-      //           var predY = history[j-2].y - deltaY;
-      //           console.log( name + ":pred pts:" + this.print( history[j-4] ) + this.print( history[j-3] ) + this.print( history[j-2] ) );
-      //           console.log( name + ":prediction:(" + predX + "," + predY + "); actual" + this.print( history[j-1] ) );
-      //         }
-      //       }
-      //     }
-      //   }
-      // };
-      //
+    this.predictCoordinates = function ( history )
+    {
+      var j = history ? history.length : 0;
+
+      var isAccurate = false;
+
+      var predictedX = 0;
+      var predictedY = 0;
+
+      // we have history, and we have at least 4 points
+      if ( j > 3 )
+      {
+        var deltaX1 = ( history[j-4].x - history[j-3].x );
+        var deltaX2 = ( history[j-3].x - history[j-2].x );
+        var deltaX = (deltaX1 + deltaX2)/2;
+        predictedX = history[j-2].x - deltaX;
+
+        var deltaY1 = ( history[j-4].y - history[j-3].y );
+        var deltaY2 = ( history[j-3].y - history[j-2].y );
+        var deltaY = (deltaY1 + deltaY2)/2;
+        predictedY = history[j-2].y - deltaY;
+
+        var actualX = history[j-1].x;
+        var actualY = history[j-1].y;
+
+        if ( actualX && actualY )
+        {
+          var accuracyY = ~~( 100 * predictedY / actualY );
+          var accuracyX = ~~( 100 * predictedX / actualX );
+          //console.log ( "accuracy:" + accuracyX + "," + accuracyY );
+
+
+
+          if ( Math.abs( accuracyX - 100 ) < 1 &&
+               Math.abs( accuracyY - 100 ) < 1 )
+          {
+            // we are good
+            isAccurate = true;
+            predictedX = history[ j-1 ].x - (2*deltaX);
+            predictedY = history[ j-1 ].y - (2*deltaY);
+          }
+
+        }
+
+
+      }
+
+      return { "isAccurate": isAccurate,
+               "x": predictedX,
+               "y": predictedY };
+
+    };
+
+    this.shouldSplitAtTarget = function( target )
+    {
+      var name = this.getNamePlayerCell( target);
+      var history = this.targetHistory[ name ];
+      var shouldSplit = this.predictCoordinates( history );
+
+      return shouldSplit;
+    };
+
+
 
 
     /**
@@ -1149,12 +1184,12 @@ function AposBot() {
                     var allSplitTargets = allIsAll[3];
 
                     // do nothing for now.  track targets and make predictions.
-                    this.trackTargets( allPossibleThreats );
+                    this.trackTargets( allSplitTargets );
 
                     // to do:  make sure I don't consider my own cells as a target
 
                     // arbitrary:  try some % of normal split distance
-                    var smallerSplitDistance = ( ~~( this.splitDistance * this.autoSplitPercent) );
+                    var smallerSplitDistance = ( ~~( (player[k].size + this.splitDistance) * this.autoSplitPercent) );
 
                     // reset before looping through targets.
                     this.shouldSplitMe = false;
@@ -1194,9 +1229,12 @@ function AposBot() {
                       {
                         // console.log ( "wanting to split:" + new Date().toString() );
                         ++this.myCellCount;
-                        this.shouldSplitMe = true;
 
-                        destinationChoices = [closestTarget.x, closestTarget.y];
+
+                        var shouldSplitDetail = this.shouldSplitAtTarget( closestTarget );
+                        this.shouldSplitMe = shouldSplitDetail.isAccurate;
+
+                        destinationChoices = [shouldSplitDetail.x, shouldSplitDetail.y];
                         return destinationChoices;
 
                       }
