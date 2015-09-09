@@ -24,9 +24,14 @@ function runThis()
   console.log( "length:" + everybody.length );
 
   var history2 = [];
-  history2.push( {"x":11, "y":21} );
+
+  var target = {"x":11, "y":21};
+  history2.push( target );
   history2.push( {"x":21, "y":31} );
   history2.push( {"x":31, "y":41} );
+  target.x = 100;
+  target.y = 200;
+  history2.push( target );
   everybody[ "two" ] = history2;
 
   console.log( "length:" + everybody.length );
@@ -36,7 +41,7 @@ function runThis()
   console.log( "length:" + getBack.length );
   getBack.push( {x:7, y:8});
 
-  var getBack2 = everybody[ "one" ];
+  var getBack2 = everybody[ "two" ];
   for (var i = 0; i < getBack2.length; ++i )
   {
     var thing = getBack2[ i ];
