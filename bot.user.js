@@ -295,7 +295,8 @@ function AposBot() {
 
 
     this.canSplit = function(player1, player2) {
-        return this.compareSize(player1, player2, 2.8) && !this.compareSize(player1, player2, 20);
+        //changed the threshold for splitting to 2.66 from 2.8
+        return this.compareSize(player1, player2, 2.66) && !this.compareSize(player1, player2, 20);
     };
 
     this.isItMe = function(player, cell)
